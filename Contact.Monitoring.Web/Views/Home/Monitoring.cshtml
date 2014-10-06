@@ -1,0 +1,29 @@
+﻿@using Contact.Monitoring.Web.ViewModel
+@{
+    ViewBag.Title = "Monitoring";
+}
+<hgroup class="title">
+    <h1>@ViewBag.Title.</h1>
+    <h2>@ViewBag.Message</h2>
+</hgroup>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-6">
+            @(Html.Kendo().Grid<SystemUpTimeViewModel>()
+                          .Name("kSystemUpTime")
+                          .Columns(columns =>
+                            {
+                                columns.Bound(c => c.MachineName);
+                                columns.Bound(c => c.Service);
+                            })
+                          .Scrollable(s => s.Height(200))
+                          .AutoBind(true)
+                          .DataSource(ds =>
+                                      ds.Ajax()
+                                        .Read(read => read.Action("GetSystemUpTime", "Home")))
+             )
+        </div>
+        <div class="col-lg-6">.col-lg-6</div>
+    </div>
+</div>
