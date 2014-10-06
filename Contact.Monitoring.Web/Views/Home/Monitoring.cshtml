@@ -9,21 +9,40 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-lg-6">
+        <div class="col-lg-12">
             @(Html.Kendo().Grid<SystemUpTimeViewModel>()
                           .Name("kSystemUpTime")
                           .Columns(columns =>
-                          {
-                                columns.Bound(c => c.LastBootUpTime);
-                                columns.Bound(c => c.MachineName);
-                                columns.Bound(c => c.Service);
-                            })
+    {
+        columns.Bound(c => c.MachineName);
+        columns.Bound(c => c.Service);
+        columns.Bound(c => c.LastBootUpTime);
+    })
                           .AutoBind(true)
                           .DataSource(ds =>
                                       ds.Ajax()
                                         .Read(read => read.Action("GetSystemUpTime", "Home")))
              )
         </div>
-        <div class="col-lg-6">.col-lg-6</div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            @(Html.Kendo().Grid<PerformanceCounterDataViewModel>()
+                          .Name("kPerformanceData")
+                          .Pageable()
+                          .Columns(columns =>
+                            {
+                                columns.Bound(c => c.Timestamp);
+                                columns.Bound(c => c.MachineName);
+                                columns.Bound(c => c.Service);
+                                columns.Bound(c => c.Counter);
+                                columns.Bound(c => c.Value);
+                            })
+                          .AutoBind(true)
+                          .DataSource(ds =>
+                                      ds.Ajax()
+                                        .Read(read => read.Action("GetSystemActivity", "Home")))
+            )
+        </div>
     </div>
 </div>

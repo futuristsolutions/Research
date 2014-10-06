@@ -181,6 +181,7 @@
     <Compile Include="Models\PerformanceCounterData.cs" />
     <Compile Include="Models\SystemUpTime.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModel\PerformanceCounterData.cs" />
     <Compile Include="ViewModel\SystemUpTime.cs" />
   </ItemGroup>
   <ItemGroup>
