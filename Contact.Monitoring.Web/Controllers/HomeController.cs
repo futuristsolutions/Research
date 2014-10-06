@@ -5,6 +5,8 @@ using System.Web;
 using System.Web.Mvc;
 using Contact.Monitoring.Web.Models;
 using Contact.Monitoring.Web.ViewModel;
+using Kendo.Mvc.UI;
+using Kendo.Mvc.Extensions;
 
 namespace Contact.Monitoring.Web.Controllers
 {
@@ -38,7 +40,7 @@ namespace Contact.Monitoring.Web.Controllers
             return View();
         }
 
-        public ActionResult GetSystemUpTime()
+        public JsonResult GetSystemUpTime([DataSourceRequest] DataSourceRequest request)
         {
             var context = new MonitoringContext();
             var result = context.SystemUpTimes.Select(s => new SystemUpTimeViewModel
@@ -47,7 +49,7 @@ namespace Contact.Monitoring.Web.Controllers
                 LastBootUpTime = s.LastBootUpTime,
                 MachineName = s.MachineName
             }).ToList();
-            return Json(result,JsonRequestBehavior.AllowGet);
+            return Json(result.ToDataSourceResult(request),JsonRequestBehavior.AllowGet);
         }
     }
 }

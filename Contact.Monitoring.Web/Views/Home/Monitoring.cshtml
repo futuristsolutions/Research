@@ -13,11 +13,11 @@
             @(Html.Kendo().Grid<SystemUpTimeViewModel>()
                           .Name("kSystemUpTime")
                           .Columns(columns =>
-                            {
+                          {
+                                columns.Bound(c => c.LastBootUpTime);
                                 columns.Bound(c => c.MachineName);
                                 columns.Bound(c => c.Service);
                             })
-                          .Scrollable(s => s.Height(200))
                           .AutoBind(true)
                           .DataSource(ds =>
                                       ds.Ajax()
