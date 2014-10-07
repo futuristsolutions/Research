@@ -29,26 +29,7 @@ namespace Contact.Monitoring.Web.Controllers
 
             return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
-
-
-        public JsonResult GetSystemActivity([DataSourceRequest] DataSourceRequest request)
-        {
-            var context = new MonitoringContext();
-            var result = context.PerformanceCounterDatas
-                .ToList()
-                .Select(s => new PerformanceCounterDataViewModel
-                {
-                    Service = s.Service,
-                    Id = s.Id,
-                    Timestamp = s.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
-                    MachineName = s.MachineName,
-                    Counter = s.Counter,
-                    Value = s.CounterValue
-                });
-            return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
-        }
-
-
+       
         public JsonResult GetSchedulerStatus([DataSourceRequest] DataSourceRequest request)
         {
             var context = new MonitoringContext();
@@ -89,6 +70,7 @@ namespace Contact.Monitoring.Web.Controllers
                           Timestamp = group.Max(p => p.Timestamp),
                           Value = group.Max(p => p.CounterValue)
                       })
+                    .OrderBy(s => new { s.Service, s.MachineName })
                     .ToList()
                     .Select(s => new PerformanceCounterDataViewModel
                     {
@@ -99,6 +81,41 @@ namespace Contact.Monitoring.Web.Controllers
                         Value = s.Value
                     });
 
+            return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult GetSystemActivity([DataSourceRequest] DataSourceRequest request)
+        {
+            var context = new MonitoringContext();
+            var result = context.PerformanceCounterDatas
+                .ToList()
+                .Select(s => new PerformanceCounterDataViewModel
+                {
+                    Service = s.Service,
+                    Id = s.Id,
+                    Timestamp = s.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
+                    MachineName = s.MachineName,
+                    Counter = s.Counter,
+                    Value = s.CounterValue
+                });
+            return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult GetCounterValues([DataSourceRequest] DataSourceRequest request)
+        {
+            var context = new MonitoringContext();
+            var result = context.PerformanceCounterDatas
+                 .Where(c => c.Counter == "% processor time")
+                .ToList()
+                .Select(s => new PerformanceCounterDataViewModel
+                {
+                    Service = s.Service,
+                    Id = s.Id,
+                    Timestamp = s.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
+                    MachineName = s.MachineName,
+                    Counter = s.Counter,
+                    Value = s.CounterValue
+                });
             return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
     }

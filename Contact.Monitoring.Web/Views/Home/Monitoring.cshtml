@@ -9,6 +9,7 @@
 </hgroup>
 
 <div class="container-fluid">
+    <div class="row"><p /></div>
     <div class="row">
         <div class="col-lg-6">
             @(Html.Kendo().Grid<SystemUpTimeViewModel>()
@@ -39,8 +40,8 @@
                   .AutoBind(true)
                   .DataSource(ds =>
                       ds.Ajax()
-                                  .Read(read => read.Action("GetSchedulerStatus", "DataProvider")))
-            )
+                          .Read(read => read.Action("GetSchedulerStatus", "DataProvider")))
+                  )
         </div>
     </div>
     <div class="row"><p/></div>
@@ -60,29 +61,64 @@
                   .AutoBind(true)
                   .DataSource(ds =>
                       ds.Ajax()
-                      .Read(read => read.Action("GetAllSystemStatus", "DataProvider")))
+                          .Read(read => read.Action("GetAllSystemStatus", "DataProvider")))
                   )
         </div>
     </div>
     <div class="row"><p /></div>
     <div class="row">
+        @(Html.Kendo().Chart()
+        .Name("chart-cpuusage")
+        .Title("%CPU Usage")
+        .Legend(legend => legend
+            .Position(ChartLegendPosition.Bottom)
+        )
+        .ChartArea(chartArea => chartArea
+            .Background("transparent")
+        )
+        .SeriesDefaults(seriesDefaults =>
+            seriesDefaults.Line().Style(ChartLineStyle.Smooth)
+        )
+        .Series(series =>
+        {
+            series.Line(new double[] { 3.907, 7.943, 7.848, 9.284, 9.263, 9.801, 3.890, 8.238, 9.552, 6.855 }).Name("India");
+        })
+        .CategoryAxis(axis => axis
+            .Categories("2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011")
+            .MajorGridLines(lines => lines.Visible(false))
+        )
+        .ValueAxis(axis => axis
+            .Numeric().Labels(labels => labels.Format("{0}%"))
+            .Line(line => line.Visible(false))
+        )
+        .Tooltip(tooltip => tooltip
+            .Visible(true)
+            .Format("{0}%")
+        )
+        )
+
+        
+        
+    </div>
+    <div class="row"><p /></div>
+    <div class="row">
         <div class="col-lg-12">
             @(Html.Kendo().Grid<PerformanceCounterDataViewModel>()
-                          .Name("kPerformanceData")
-                          .Pageable()
-                          .Columns(columns =>
-                            {
-                                columns.Bound(c => c.Timestamp);
-                                columns.Bound(c => c.MachineName);
-                                columns.Bound(c => c.Service);
-                                columns.Bound(c => c.Counter);
-                                columns.Bound(c => c.Value);
-                            })
-                          .AutoBind(true)
-                          .DataSource(ds =>
-                                      ds.Ajax()
-                                                .Read(read => read.Action("GetSystemActivity", "DataProvider")))
-            )
+                  .Name("kPerformanceData")
+                  .Pageable()
+                  .Columns(columns =>
+                  {
+                      columns.Bound(c => c.Timestamp);
+                      columns.Bound(c => c.MachineName);
+                      columns.Bound(c => c.Service);
+                      columns.Bound(c => c.Counter);
+                      columns.Bound(c => c.Value);
+                  })
+                  .AutoBind(true)
+                  .DataSource(ds =>
+                      ds.Ajax()
+                          .Read(read => read.Action("GetSystemActivity", "DataProvider")))
+                  )
         </div>
     </div>
 </div>
