@@ -48,10 +48,10 @@ namespace Contact.Monitoring.Web.Controllers
                  .Select(r => new PerformanceCounterDataViewModel
                  {
                      Service = r.Service,
-                     Timestamp = r.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
+                     TimestampString = r.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
                      MachineName = r.MachineName,
                      Counter = "successful requests",
-                     Value = r.Value
+                     CounterValue = (double)r.Value
                  });
             return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
@@ -75,10 +75,10 @@ namespace Contact.Monitoring.Web.Controllers
                     .Select(s => new PerformanceCounterDataViewModel
                     {
                         Service = s.Service,
-                        Timestamp = s.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
+                        TimestampString = s.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
                         MachineName = s.MachineName,
                         Counter = s.Counter,
-                        Value = s.Value
+                        CounterValue = (double)s.Value
                     });
 
             return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
@@ -93,10 +93,10 @@ namespace Contact.Monitoring.Web.Controllers
                 {
                     Service = s.Service,
                     Id = s.Id,
-                    Timestamp = s.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
+                    TimestampString = s.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
                     MachineName = s.MachineName,
                     Counter = s.Counter,
-                    Value = s.CounterValue
+                    CounterValue = (double)s.CounterValue
                 });
             return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
@@ -111,12 +111,15 @@ namespace Contact.Monitoring.Web.Controllers
                 {
                     Service = s.Service,
                     Id = s.Id,
-                    Timestamp = s.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
+                    TimestampString = s.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
+                    Timestamp = s.Timestamp,
                     MachineName = s.MachineName,
                     Counter = s.Counter,
-                    Value = s.CounterValue
-                });
-            return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
+                    CounterValue = (double)s.CounterValue
+                })
+                .Take(100)
+                .ToList();
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
     }
 }

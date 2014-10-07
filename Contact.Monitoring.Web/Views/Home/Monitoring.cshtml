@@ -32,10 +32,10 @@
                   .Name("kSchedulerStatus")
                   .Columns(columns =>
                   {
-                      columns.Bound(c => c.Timestamp);
+                      columns.Bound(c => c.TimestampString);
                       columns.Bound(c => c.MachineName);
                       columns.Bound(c => c.Counter);
-                      columns.Bound(c => c.Value);
+                      columns.Bound(c => c.CounterValue);
                   })
                   .AutoBind(true)
                   .DataSource(ds =>
@@ -52,11 +52,11 @@
                   .Scrollable()
                   .Columns(columns =>
                   {
-                      columns.Bound(c => c.Timestamp);
+                      columns.Bound(c => c.TimestampString);
                       columns.Bound(c => c.MachineName);
                       columns.Bound(c => c.Service);
                       columns.Bound(c => c.Counter);
-                      columns.Bound(c => c.Value);
+                      columns.Bound(c => c.CounterValue);
                   })
                   .AutoBind(true)
                   .DataSource(ds =>
@@ -67,7 +67,7 @@
     </div>
     <div class="row"><p /></div>
     <div class="row">
-        @(Html.Kendo().Chart()
+        @(Html.Kendo().Chart<PerformanceCounterDataViewModel>()
         .Name("chart-cpuusage")
         .Title("%CPU Usage")
         .Legend(legend => legend
@@ -79,13 +79,17 @@
         .SeriesDefaults(seriesDefaults =>
             seriesDefaults.Line().Style(ChartLineStyle.Smooth)
         )
+        .DataSource(ds => ds.Read(read => read.Action("GetCounterValues", "DataProvider")))
         .Series(series =>
         {
-            series.Line(new double[] { 3.907, 7.943, 7.848, 9.284, 9.263, 9.801, 3.890, 8.238, 9.552, 6.855 }).Name("India");
+            //series.Line(new double[] { 3.907, 7.943, 7.848, 9.284, 9.263, 9.801, 3.890, 8.238, 9.552, 6.855 }).Name("%cpu usage");
+            series.Line(model => model.CounterValue).Name("%cpu usage");
         })
         .CategoryAxis(axis => axis
-            .Categories("2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011")
+            //.Categories("2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011")
+            .Categories(model => model.TimestampString)
             .MajorGridLines(lines => lines.Visible(false))
+            .Labels(labels => labels.Rotation(-90))
         )
         .ValueAxis(axis => axis
             .Numeric().Labels(labels => labels.Format("{0}%"))
@@ -108,11 +112,11 @@
                   .Pageable()
                   .Columns(columns =>
                   {
-                      columns.Bound(c => c.Timestamp);
+                      columns.Bound(c => c.TimestampString);
                       columns.Bound(c => c.MachineName);
                       columns.Bound(c => c.Service);
                       columns.Bound(c => c.Counter);
-                      columns.Bound(c => c.Value);
+                      columns.Bound(c => c.CounterValue);
                   })
                   .AutoBind(true)
                   .DataSource(ds =>
