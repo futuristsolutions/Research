@@ -68,8 +68,45 @@
     <div class="row"><p /></div>
     <div class="row">
         @(Html.Kendo().Chart<PerformanceCounterDataViewModel>()
-        .Name("chart-cpuusage")
-        .Title("%CPU Usage")
+              .Name("chart-cpuusage")
+              .Title("%CPU Usage")
+              .Legend(legend => legend
+                  .Position(ChartLegendPosition.Bottom)
+              )
+              .ChartArea(chartArea => chartArea
+                  .Background("transparent")
+              )
+              .SeriesDefaults(seriesDefaults =>
+                  seriesDefaults.Line().Style(ChartLineStyle.Smooth)
+              )
+              .DataSource(ds => ds.Read(read => read.Action("GetCpuValues", "DataProvider")))
+              .Series(series =>
+              {
+                  series.Line(model => model.CounterValue).Name("%cpu usage");
+              })
+              .CategoryAxis(axis => axis
+                  .Categories(model => model.TimestampString)
+                  .MajorGridLines(lines => lines.Visible(false))
+                  .Labels(labels => labels.Rotation(-90))
+              )
+              .ValueAxis(axis => axis
+                  .Numeric().Labels(labels => labels.Format("{0}%"))
+                  .Line(line => line.Visible(false))
+              )
+              .Tooltip(tooltip => tooltip
+                  .Visible(true)
+                  .Format("{0}%")
+              )
+              )
+
+        
+        
+    </div>
+    <div class="row"><p /></div>
+    <div class="row">
+        @(Html.Kendo().Chart<PerformanceCounterDataViewModel>()
+        .Name("chart-memoryusage")
+        .Title("Memory Usage")
         .Legend(legend => legend
             .Position(ChartLegendPosition.Bottom)
         )
@@ -79,14 +116,12 @@
         .SeriesDefaults(seriesDefaults =>
             seriesDefaults.Line().Style(ChartLineStyle.Smooth)
         )
-        .DataSource(ds => ds.Read(read => read.Action("GetCounterValues", "DataProvider")))
+         .DataSource(ds => ds.Read(read => read.Action("GetMemoryValues", "DataProvider")))
         .Series(series =>
         {
-            //series.Line(new double[] { 3.907, 7.943, 7.848, 9.284, 9.263, 9.801, 3.890, 8.238, 9.552, 6.855 }).Name("%cpu usage");
-            series.Line(model => model.CounterValue).Name("%cpu usage");
+            series.Line(model => model.CounterValue).Name("Memory usage");
         })
         .CategoryAxis(axis => axis
-            //.Categories("2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011")
             .Categories(model => model.TimestampString)
             .MajorGridLines(lines => lines.Visible(false))
             .Labels(labels => labels.Rotation(-90))
@@ -101,9 +136,8 @@
         )
         )
 
-        
-        
     </div>
+
     <div class="row"><p /></div>
     <div class="row">
         <div class="col-lg-12">

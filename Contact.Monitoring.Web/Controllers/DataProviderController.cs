@@ -101,24 +101,43 @@ namespace Contact.Monitoring.Web.Controllers
             return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult GetCounterValues([DataSourceRequest] DataSourceRequest request)
+        public JsonResult GetCpuValues([DataSourceRequest] DataSourceRequest request)
         {
             var context = new MonitoringContext();
             var result = context.PerformanceCounterDatas
                  .Where(c => c.Counter == "% processor time")
-                .ToList()
-                .Select(s => new PerformanceCounterDataViewModel
+                 .ToList()
+                .Select(s => new 
                 {
-                    Service = s.Service,
-                    Id = s.Id,
                     TimestampString = s.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
-                    Timestamp = s.Timestamp,
-                    MachineName = s.MachineName,
-                    Counter = s.Counter,
+                    Time = s.Timestamp.ToString("yyyy-MM-dd HH:mm:00"),
                     CounterValue = (double)s.CounterValue
                 })
-                .Take(100)
-                .ToList();
+                .GroupBy(g => g.Time, (key, group) => new PerformanceCounterDataViewModel
+                {
+                    TimestampString = key,
+                    CounterValue = group.Max(g => g.CounterValue)
+                });
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult GetMemoryValues([DataSourceRequest] DataSourceRequest request)
+        {
+            var context = new MonitoringContext();
+            var result = context.PerformanceCounterDatas
+                 .Where(c => c.Counter == "available mbytes")
+                 .ToList()
+                .Select(s => new
+                {
+                    TimestampString = s.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
+                    Time = s.Timestamp.ToString("yyyy-MM-dd HH:mm:00"),
+                    CounterValue = (double)s.CounterValue
+                })
+                .GroupBy(g => g.Time, (key, group) => new PerformanceCounterDataViewModel
+                {
+                    TimestampString = key,
+                    CounterValue = group.Max(g => g.CounterValue)
+                });
             return Json(result, JsonRequestBehavior.AllowGet);
         }
     }
