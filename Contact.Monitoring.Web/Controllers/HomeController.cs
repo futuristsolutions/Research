@@ -40,32 +40,5 @@ namespace Contact.Monitoring.Web.Controllers
             return View();
         }
 
-        public JsonResult GetSystemUpTime([DataSourceRequest] DataSourceRequest request)
-        {
-            var context = new MonitoringContext();
-            var result = context.SystemUpTimes.Select(s => new SystemUpTimeViewModel
-            {
-                Service = s.Service,
-                LastBootUpTime = s.LastBootUpTime,
-                MachineName = s.MachineName
-            }).ToList();
-            return Json(result.ToDataSourceResult(request),JsonRequestBehavior.AllowGet);
-        }
-
-
-        public JsonResult GetSystemActivity([DataSourceRequest] DataSourceRequest request)
-        {
-            var context = new MonitoringContext();
-            var result = context.PerformanceCounterDatas.Select(s => new PerformanceCounterDataViewModel
-            {
-                Service = s.Service,
-                Id = s.Id,
-                Timestamp = s.Timestamp,
-                MachineName = s.MachineName,
-                Counter = s.Counter,
-                Value = s.CounterValue
-            }).ToList();
-            return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
-        }
     }
 }
