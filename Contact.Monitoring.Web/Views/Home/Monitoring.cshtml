@@ -5,7 +5,6 @@
 }
 <hgroup class="title">
     <h1>@ViewBag.Title.</h1>
-    <h2>@ViewBag.Message</h2>
 </hgroup>
 
 <div class="container-fluid">
@@ -79,7 +78,7 @@
               .SeriesDefaults(seriesDefaults =>
                   seriesDefaults.Line().Style(ChartLineStyle.Smooth)
               )
-              .DataSource(ds => ds.Read(read => read.Action("GetCpuValues", "DataProvider")))
+              .DataSource(ds => ds.Read(read => read.Action("GetCounterValues", "DataProvider", new { counter = "% processor time" })))
               .Series(series =>
               {
                   series.Line(model => model.CounterValue).Name("%cpu usage");
@@ -116,7 +115,7 @@
         .SeriesDefaults(seriesDefaults =>
             seriesDefaults.Line().Style(ChartLineStyle.Smooth)
         )
-         .DataSource(ds => ds.Read(read => read.Action("GetMemoryValues", "DataProvider")))
+        .DataSource(ds => ds.Read(read => read.Action("GetCounterValues", "DataProvider", new { counter = "available mbytes" })))
         .Series(series =>
         {
             series.Line(model => model.CounterValue).Name("Memory usage");
@@ -127,17 +126,52 @@
             .Labels(labels => labels.Rotation(-90))
         )
         .ValueAxis(axis => axis
-            .Numeric().Labels(labels => labels.Format("{0}%"))
+            .Numeric().Labels(labels => labels.Format("{0} Mbytes"))
             .Line(line => line.Visible(false))
         )
         .Tooltip(tooltip => tooltip
             .Visible(true)
-            .Format("{0}%")
+            .Format("{0} Mbytes")
         )
         )
 
     </div>
+    
+    <div class="row"><p /></div>
+    <div class="row">
+        @(Html.Kendo().Chart<PerformanceCounterDataViewModel>()
+        .Name("chart-notification")
+        .Title("Notification")
+        .Legend(legend => legend
+            .Position(ChartLegendPosition.Bottom)
+        )
+        .ChartArea(chartArea => chartArea
+            .Background("transparent")
+        )
+        .SeriesDefaults(seriesDefaults =>
+            seriesDefaults.Line().Style(ChartLineStyle.Smooth)
+        )
+        .DataSource(ds => ds.Read(read => read.Action("GetCounterValues", "DataProvider", new { counter = "requests served" })))
+        .Series(series =>
+        {
+            series.Line(model => model.CounterValue).Name("Notifications");
+        })
+        .CategoryAxis(axis => axis
+            .Categories(model => model.TimestampString)
+            .MajorGridLines(lines => lines.Visible(false))
+            .Labels(labels => labels.Rotation(-90))
+        )
+        .ValueAxis(axis => axis
+            .Numeric().Labels(labels => labels.Format("{0}"))
+            .Line(line => line.Visible(false))
+        )
+        .Tooltip(tooltip => tooltip
+            .Visible(true)
+            .Format("{0}")
+        )
+        )
 
+    </div>
     <div class="row"><p /></div>
     <div class="row">
         <div class="col-lg-12">
