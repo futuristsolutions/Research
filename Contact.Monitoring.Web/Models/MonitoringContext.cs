@@ -17,11 +17,15 @@ namespace Contact.Monitoring.Web.Models
         }
 
         public DbSet<PerformanceCounterData> PerformanceCounterDatas { get; set; }
+        public DbSet<ServiceStatu> ServiceStatus { get; set; }
+        public DbSet<SystemDiskSpace> SystemDiskSpaces { get; set; }
         public DbSet<SystemUpTime> SystemUpTimes { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Configurations.Add(new PerformanceCounterDataMap());
+            modelBuilder.Configurations.Add(new ServiceStatuMap());
+            modelBuilder.Configurations.Add(new SystemDiskSpaceMap());
             modelBuilder.Configurations.Add(new SystemUpTimeMap());
         }
     }

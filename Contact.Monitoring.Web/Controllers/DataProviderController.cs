@@ -1,6 +1,8 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Web.Mvc;
 using Contact.Monitoring.Web.Models;
+using Contact.Monitoring.Web.Repository;
 using Contact.Monitoring.Web.ViewModel;
 using Kendo.Mvc.Extensions;
 using Kendo.Mvc.UI;
@@ -9,54 +11,56 @@ namespace Contact.Monitoring.Web.Controllers
 {
     public class DataProviderController : Controller
     {
-
         public JsonResult GetSystemUpTime([DataSourceRequest] DataSourceRequest request)
         {
-            var context = new MonitoringContext();
-            var result = context.SystemUpTimes
-                .ToList()
+            var queryResult = _monitoringRepository.GetAllSystemUpTimes();
+            var result = queryResult
                 .Select(s => new SystemUpTimeViewModel
-            {
-                Service = s.Service,
-                LastBootUpTime = s.LastBootUpTime.ToString("yyyy-MM-dd HH:mm:ss"),
-                MachineName = s.MachineName
-            });
+                {
+                    Service = s.Service,
+                    LastBootUpTime = s.LastBootUpTime.ToString("yyyy-MM-dd HH:mm:ss"),
+                    MachineName = s.MachineName
+                });
 
             return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
-       
-        public JsonResult GetSchedulerStatus([DataSourceRequest] DataSourceRequest request)
+
+        public JsonResult GetTotalPushNotification([DataSourceRequest] DataSourceRequest request)
         {
-            var context = new MonitoringContext();
-            var queryResult = context.PerformanceCounterDatas
-                .Where(p => p.Service.Equals("Scheduler") && p.Counter.Equals("successful requests"))
-                .GroupBy(g => new {g.MachineName,g.Service},
-                 (key, group) => new  
-                 {
-                       key.Service,
-                       Timestamp = group.Max(p => p.Timestamp),
-                       key.MachineName,
-                       Value = group.Max(p => p.CounterValue)
-                 })
-                 .ToList();
+            var queryResult = _monitoringRepository.GetMaximumCounterValueByService("Scheduler", "successful requests");
             var result = queryResult
-                 .Select(r => new PerformanceCounterDataViewModel
-                 {
-                     Service = r.Service,
-                     TimestampString = r.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
-                     MachineName = r.MachineName,
-                     Counter = "successful requests",
-                     CounterValue = (double)r.Value
-                 });
+                .Select(r => new PerformanceCounterDataViewModel
+                {
+                    Service = r.Service,
+                    Timestamp = r.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
+                    MachineName = r.MachineName,
+                    Counter = "Push",
+                    CounterValue = (double) r.CounterValue
+                });
+            return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
+        }
+
+
+        public JsonResult GetLastNotification([DataSourceRequest] DataSourceRequest request)
+        {
+            var queryResult = _monitoringRepository.GetLastCounterValueByService("Scheduler", "successful requests");
+            var result = queryResult
+                .Select(r => new PerformanceCounterDataViewModel
+                {
+                    Service = r.Service,
+                    Timestamp = r.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
+                    MachineName = r.MachineName,
+                    Counter = "Push",
+                    CounterValue = (double)r.CounterValue
+                });
             return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
 
         public JsonResult GetAllSystemStatus([DataSourceRequest] DataSourceRequest request)
         {
-            var context = new MonitoringContext();
-            var result = context.PerformanceCounterDatas
-                  .Where(p => p.Counter.Equals("% processor time") || p.Counter.Equals("available mbytes"))
-                  .GroupBy(g => new { g.MachineName, g.Service, g.Counter },
+            var queryResult = _monitoringRepository.GetCounterValues(new[]{"% processor time", "available mbytes"});
+            var result = queryResult
+                    .GroupBy(g => new { g.MachineName, g.Service, g.Counter },
                       (key, group) => new
                       {
                           key.Service,
@@ -65,15 +69,55 @@ namespace Contact.Monitoring.Web.Controllers
                           Timestamp = group.Max(p => p.Timestamp),
                           Value = group.Max(p => p.CounterValue)
                       })
-                    .OrderBy(s => new { s.Service, s.MachineName })
-                    .ToList()
                     .Select(s => new PerformanceCounterDataViewModel
                     {
                         Service = s.Service,
-                        TimestampString = s.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
+                        Timestamp = s.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
                         MachineName = s.MachineName,
                         Counter = s.Counter,
                         CounterValue = (double)s.Value
+                    })
+                    .ToList();
+
+            return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult GetAllSystemCurrentStatus([DataSourceRequest] DataSourceRequest request)
+        {
+            var queryResult = new List<PerformanceCounterData>
+            {
+                _monitoringRepository.GetLastCounterValue("WebApi", "% processor time"),
+                _monitoringRepository.GetLastCounterValue("WebApi", "available mbytes"),
+                _monitoringRepository.GetLastCounterValue("Scheduler", "% processor time"),
+                _monitoringRepository.GetLastCounterValue("Scheduler", "available mbytes"),
+                _monitoringRepository.GetLastCounterValue("Listener", "% processor time"),
+                _monitoringRepository.GetLastCounterValue("Listener", "available mbytes"),
+            };
+            var result = queryResult.Select(s => new PerformanceCounterDataViewModel
+                    {
+                        Service = s.Service,
+                        Timestamp = s.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
+                        MachineName = s.MachineName,
+                        Counter = s.Counter,
+                        CounterValue = (double)s.CounterValue
+                    })
+                    .ToList();
+            return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
+        }
+
+
+        public JsonResult GetAllServiceStatus([DataSourceRequest] DataSourceRequest request)
+        {
+            var queryResult = _monitoringRepository.GetAllServiceStatus();
+            var result = queryResult
+                    
+                    .Select(s => new ServiceStatuViewModel
+                    {
+                        Service = s.Service,
+                        LastUpdatedDateTime = s.LastUpdatedDateTime.ToString("yyyy-MM-dd HH:mm:ss"),
+                        MachineName = s.MachineName,
+                        Instance = s.Instance,
+                        Status = s.Status
                     });
 
             return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
@@ -81,39 +125,53 @@ namespace Contact.Monitoring.Web.Controllers
 
         public JsonResult GetSystemActivity([DataSourceRequest] DataSourceRequest request)
         {
-            var context = new MonitoringContext();
-            var result = context.PerformanceCounterDatas
-                .ToList()
+            var queryResult = _monitoringRepository.GetAllCounterValues();
+            var result = queryResult
                 .Select(s => new PerformanceCounterDataViewModel
                 {
                     Service = s.Service,
                     Id = s.Id,
-                    TimestampString = s.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
+                    Timestamp = s.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
                     MachineName = s.MachineName,
                     Counter = s.Counter,
-                    CounterValue = (double)s.CounterValue
+                    CounterValue = (double) s.CounterValue
                 });
             return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult GetCounterValues(string counter)
+        public JsonResult GetCounterValuesByMachine(string counter)
         {
-            var context = new MonitoringContext();
-            var result = context.PerformanceCounterDatas
-                 .Where(c => c.Counter == counter)
-                 .ToList()
+            var queryResult = _monitoringRepository.GetCounterValues(new[]{counter});
+            var result = queryResult
                 .Select(s => new
                 {
-                    TimestampString = s.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
-                    Time = s.Timestamp.ToString("yyyy-MM-dd HH:00:00"),
-                    CounterValue = (double)s.CounterValue
+                    Time = s.Timestamp.ToString("yyyy-MM-dd HH"),
+                    CounterValue = (double) s.CounterValue
                 })
                 .GroupBy(g => g.Time, (key, group) => new PerformanceCounterDataViewModel
                 {
-                    TimestampString = key,
+                    Timestamp = key,
                     CounterValue = group.Max(g => g.CounterValue)
                 });
             return Json(result, JsonRequestBehavior.AllowGet);
         }
+        public JsonResult GetMemoryUsage()
+        {
+            var queryResult = _monitoringRepository.GetCounterValues(new[] { "available mbytes" });
+            var result = queryResult
+                .Select(s => new
+                {
+                    Time = s.Timestamp.ToString("yyyy-MM-dd HH"),
+                    CounterValue = 8000.0 - (double) s.CounterValue
+                })
+                .GroupBy(g => g.Time, (key, group) => new PerformanceCounterDataViewModel
+                {
+                    Timestamp = key,
+                    CounterValue = group.Max(g => g.CounterValue)
+                });
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        private readonly MonitoringRepository _monitoringRepository = new MonitoringRepository();
     }
 }

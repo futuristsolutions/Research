@@ -22,6 +22,7 @@ namespace Contact.Monitoring.Web.Models.Mapping
             // Table & Column Mappings
             this.ToTable("SystemUpTime");
             this.Property(t => t.Id).HasColumnName("Id");
+            this.Property(t => t.LastUpdatedDateTime).HasColumnName("LastUpdatedDateTime");
             this.Property(t => t.MachineName).HasColumnName("MachineName");
             this.Property(t => t.LastBootUpTime).HasColumnName("LastBootUpTime");
             this.Property(t => t.Service).HasColumnName("Service");
