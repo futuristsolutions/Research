@@ -1,0 +1,263 @@
+﻿@using Contact.Monitoring.Web.Controllers
+@using Contact.Monitoring.Web.Repository
+@using Contact.Monitoring.Web.ViewModel
+@{
+    ViewBag.Title = "Monitoring";
+}
+<hgroup class="title">
+    <h1>@ViewBag.Title.</h1>
+</hgroup>
+
+<div class="container-fluid">
+    <div class="row"><p /></div>
+    <div class="row">
+        <h4>System UpTime</h4>
+        <div class="col-lg-6">
+            @(Html.Kendo().Grid<SystemUpTimeViewModel>()
+                  .Name("kSystemUpTime")
+                  .Columns(columns =>
+                  {
+                      columns.Bound(c => c.MachineName);
+                      columns.Bound(c => c.Service);
+                      columns.Bound(c => c.LastBootUpTime);
+                  })
+                  .AutoBind(true)
+                  .DataSource(ds =>
+                      ds.Ajax()
+                          .Read(read => read.Action("GetSystemUpTime", "DataProvider")))
+                  )
+        </div>
+        
+        <h4>Total Notifications</h4>
+        <div class="col-lg-6">
+            @(Html.Kendo().Grid<PerformanceCounterDataViewModel>()
+                  .Name("kNotificationStatus")
+                  .Columns(columns =>
+                  {
+                      columns.Bound(c => c.Timestamp).Title("TimeStamp");
+                      columns.Bound(c => c.MachineName);
+                      columns.Bound(c => c.Counter).Title("Notification");
+                      columns.Bound(c => c.CounterValue).Title("Count");
+                  })
+                  .AutoBind(true)
+                  .DataSource(ds =>
+                      ds.Ajax()
+                          .Read(read => read.Action("GetTotalPushNotification", "DataProvider")))
+                  )
+        </div>
+    </div>
+    
+    <div class="row"> <p/></div>
+    <h4>Notification Summary (Last Notification)</h4>
+    <div class="col-lg-6">
+        @(Html.Kendo().Grid<PerformanceCounterDataViewModel>()
+                  .Name("kLastNotificationStatus")
+                  .Columns(columns =>
+                  {
+                      columns.Bound(c => c.Timestamp).Title("Last Sent Time");
+                      columns.Bound(c => c.MachineName);
+                      columns.Bound(c => c.Counter).Title("Notification");
+                  })
+                  .AutoBind(true)
+                  .DataSource(ds =>
+                      ds.Ajax()
+                          .Read(read => read.Action("GetLastNotification", "DataProvider")))
+        )
+    </div>
+
+    <div class="row"><p /></div>
+    <div class="row">
+        <h4>Service Summary</h4>
+        <div class="col-lg-12">
+            @(Html.Kendo().Grid<ServiceStatuViewModel>()
+                  .Name("kAllServiceStatus")
+                  .Scrollable()
+                  .Columns(columns =>
+                  {
+                      columns.Bound(c => c.LastUpdatedDateTime).Title("Updated Time");
+                      columns.Bound(c => c.MachineName);
+                      columns.Bound(c => c.Service);
+                      columns.Bound(c => c.Instance);
+                      columns.Bound(c => c.Status);
+                  })
+                  .AutoBind(true)
+                  .DataSource(ds =>
+                      ds.Ajax()
+                          .Read(read => read.Action("GetAllServiceStatus", "DataProvider")))
+                  )
+        </div>
+    </div>
+    <div class="row"><p /></div>
+    <div class="row">
+        <h4>System Summary (current status)</h4>
+        <div class="col-lg-12">
+            @(Html.Kendo().Grid<PerformanceCounterDataViewModel>()
+                  .Name("kAllSystemCurrentStatus")
+                  .Scrollable()
+                  .Columns(columns =>
+                  {
+                      columns.Bound(c => c.Timestamp).Title("Reported Time");
+                      columns.Bound(c => c.MachineName);
+                      columns.Bound(c => c.Service);
+                      columns.Bound(c => c.Counter);
+                      columns.Bound(c => c.CounterValue);
+                  })
+                  .AutoBind(true)
+                  .DataSource(ds =>
+                      ds.Ajax()
+                          .Read(read => read.Action("GetAllSystemCurrentStatus", "DataProvider")))
+            )
+        </div>
+    </div>
+    <div class="row"><p/></div>
+    <div class="row">
+        <h4>System Summary (last peak usage)</h4>
+        <div class="col-lg-12">
+            @(Html.Kendo().Grid<PerformanceCounterDataViewModel>()
+                  .Name("kAllSystemStatus")
+                  .Scrollable()
+                  .Columns(columns =>
+                  {
+                      columns.Bound(c => c.Timestamp).Title("Reported Time");
+                      columns.Bound(c => c.MachineName);
+                      columns.Bound(c => c.Service);
+                      columns.Bound(c => c.Counter);
+                      columns.Bound(c => c.CounterValue);
+                  })
+                  .AutoBind(true)
+                  .DataSource(ds =>
+                      ds.Ajax()
+                          .Read(read => read.Action("GetAllSystemStatus", "DataProvider")))
+                  )
+        </div>
+    </div>
+    <div class="row"><p /></div>
+    <div class="row">
+        @(Html.Kendo().Chart<PerformanceCounterDataViewModel>()
+              .Name("chart-cpuusage")
+              .Title("%CPU Usage")
+              .Legend(legend => legend
+                  .Position(ChartLegendPosition.Bottom)
+              )
+              .ChartArea(chartArea => chartArea
+                  .Background("transparent")
+              )
+              .SeriesDefaults(seriesDefaults =>
+                  seriesDefaults.Line().Style(ChartLineStyle.Smooth)
+              )
+             .DataSource(ds => ds.Read(read => read.Action("GetCounterValuesByMachine", "DataProvider", new { counter = "% processor time" })))
+              .Series(series =>
+              {
+                  series.Line(model => model.CounterValue).Name("%cpu usage");
+              })
+              .CategoryAxis(axis => axis
+                  .Categories(model => model.Timestamp)
+                  .MajorGridLines(lines => lines.Visible(false))
+                  .Labels(labels => labels.Rotation(-90))
+              )
+              .ValueAxis(axis => axis
+                  .Numeric().Labels(labels => labels.Format("{0}%"))
+                  .Line(line => line.Visible(false))
+              )
+              .Tooltip(tooltip => tooltip
+                  .Visible(true)
+                  .Format("{0}%")
+              )
+              )
+
+        
+        
+    </div>
+    <div class="row"><p /></div>
+    <div class="row">
+        @(Html.Kendo().Chart<PerformanceCounterDataViewModel>()
+        .Name("chart-memoryusage")
+        .Title("Memory Usage")
+        .Legend(legend => legend
+            .Position(ChartLegendPosition.Bottom)
+        )
+        .ChartArea(chartArea => chartArea
+            .Background("transparent")
+        )
+        .SeriesDefaults(seriesDefaults =>
+            seriesDefaults.Line().Style(ChartLineStyle.Smooth)
+        )
+                .DataSource(ds => ds.Read(read => read.Action("GetMemoryUsage", "DataProvider")))
+        .Series(series =>
+        {
+            series.Line(model => model.CounterValue).Name("Memory usage");
+        })
+        .CategoryAxis(axis => axis
+            .Categories(model => model.Timestamp)
+            .MajorGridLines(lines => lines.Visible(false))
+            .Labels(labels => labels.Rotation(-90))
+        )
+        .ValueAxis(axis => axis
+            .Numeric().Labels(labels => labels.Format("{0} Mbytes"))
+            .Line(line => line.Visible(false))
+        )
+        .Tooltip(tooltip => tooltip
+            .Visible(true)
+            .Format("{0} Mbytes")
+        )
+        )
+
+    </div>
+    
+    <div class="row"><p /></div>
+    <div class="row">
+        @(Html.Kendo().Chart<PerformanceCounterDataViewModel>()
+        .Name("chart-notification")
+        .Title("Notification")
+        .Legend(legend => legend
+            .Position(ChartLegendPosition.Bottom)
+        )
+        .ChartArea(chartArea => chartArea
+            .Background("transparent")
+        )
+        .SeriesDefaults(seriesDefaults =>
+            seriesDefaults.Line().Style(ChartLineStyle.Smooth)
+        )
+        .DataSource(ds => ds.Read(read => read.Action("GetCounterValuesByMachine", "DataProvider", new {machine = "DVUKWDCWCCS007", counter = "requests served"})))
+        .Series(series =>
+        {
+            series.Line(model => model.CounterValue).Name("Notifications");
+        })
+        .CategoryAxis(axis => axis
+            .Categories(model => model.Timestamp)
+            .MajorGridLines(lines => lines.Visible(false))
+            .Labels(labels => labels.Rotation(-90))
+        )
+        .ValueAxis(axis => axis
+            .Numeric().Labels(labels => labels.Format("{0}"))
+            .Line(line => line.Visible(false))
+        )
+        .Tooltip(tooltip => tooltip
+            .Visible(true)
+            .Format("{0}")
+        )
+        )
+
+    </div>
+    <div class="row"><p /></div>
+    <div class="row">
+        <div class="col-lg-12">
+            @(Html.Kendo().Grid<PerformanceCounterDataViewModel>()
+                  .Name("kPerformanceData")
+                  .Pageable()
+                  .Columns(columns =>
+                  {
+                      columns.Bound(c => c.Timestamp);
+                      columns.Bound(c => c.MachineName);
+                      columns.Bound(c => c.Service);
+                      columns.Bound(c => c.Counter);
+                      columns.Bound(c => c.CounterValue);
+                  })
+                  .AutoBind(true)
+                  .DataSource(ds =>
+                      ds.Ajax()
+                          .Read(read => read.Action("GetSystemActivity", "DataProvider")))
+                  )
+        </div>
+    </div>
+</div>
