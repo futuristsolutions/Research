@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using Contact.Monitoring.Web.Models;
@@ -25,9 +26,26 @@ namespace Contact.Monitoring.Web.Controllers
             return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult GetSystemDiskUsage([DataSourceRequest] DataSourceRequest request)
+        {
+            var queryResult = _monitoringRepository.GetAllSystemDiskUsage();
+            var result = queryResult
+                .Select(s => new SystemDiskSpaceViewModel
+                {
+                    Service = s.Service,
+                    LastUpdatedDateTime = s.LastUpdatedDateTime.ToString("yyyy-MM-dd HH:mm:ss"),
+                    MachineName = s.MachineName,
+                    Drive = s.Drive,
+                    FreeSpace = s.FreeSpace,
+                    Size = s.Size
+                });
+
+            return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
+        }
+
         public JsonResult GetTotalPushNotification([DataSourceRequest] DataSourceRequest request)
         {
-            var queryResult = _monitoringRepository.GetMaximumCounterValueByService("Scheduler", "successful requests");
+            var queryResult = _monitoringRepository.GetPeakCounterValueByService("Scheduler", "successful requests");
             var result = queryResult
                 .Select(r => new PerformanceCounterDataViewModel
                 {
@@ -39,7 +57,6 @@ namespace Contact.Monitoring.Web.Controllers
                 });
             return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
-
 
         public JsonResult GetLastNotification([DataSourceRequest] DataSourceRequest request)
         {
@@ -55,10 +72,23 @@ namespace Contact.Monitoring.Web.Controllers
                 });
             return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
+        
+        public JsonResult GetLastSchedulerQueueCount([DataSourceRequest] DataSourceRequest request)
+        {
+            var queryResult = _monitoringRepository.GetLastSchedulerQueueCount();
+            var result = queryResult
+                .Select(r => new SchedulerQueueCountViewModel
+                {
+                    LastUpdatedDateTime = r.LastUpdatedDateTime.ToString("yyyy-MM-dd HH:mm:ss"),
+                    QueueCount = r.QueueCount
+                });
+            return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
+        }
 
         public JsonResult GetAllSystemStatus([DataSourceRequest] DataSourceRequest request)
         {
-            var queryResult = _monitoringRepository.GetCounterValues(new[]{"% processor time", "available mbytes"});
+            var last24Hours = DateTime.UtcNow.AddHours(-24);
+            var queryResult = _monitoringRepository.GetCounterValues(new[] { "% processor time", "available mbytes" }, last24Hours);
             var result = queryResult
                     .GroupBy(g => new { g.MachineName, g.Service, g.Counter },
                       (key, group) => new
@@ -105,7 +135,6 @@ namespace Contact.Monitoring.Web.Controllers
             return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
 
-
         public JsonResult GetAllServiceStatus([DataSourceRequest] DataSourceRequest request)
         {
             var queryResult = _monitoringRepository.GetAllServiceStatus();
@@ -125,7 +154,8 @@ namespace Contact.Monitoring.Web.Controllers
 
         public JsonResult GetSystemActivity([DataSourceRequest] DataSourceRequest request)
         {
-            var queryResult = _monitoringRepository.GetAllCounterValues();
+            var last24Hours = DateTime.UtcNow.AddHours(-24);
+            var queryResult = _monitoringRepository.GetAllCounterValues(last24Hours);
             var result = queryResult
                 .Select(s => new PerformanceCounterDataViewModel
                 {
@@ -141,7 +171,8 @@ namespace Contact.Monitoring.Web.Controllers
 
         public JsonResult GetCounterValuesByMachine(string counter)
         {
-            var queryResult = _monitoringRepository.GetCounterValues(new[]{counter});
+            var last24Hours = DateTime.UtcNow.AddHours(-24);
+            var queryResult = _monitoringRepository.GetCounterValues(new[] { counter }, last24Hours);
             var result = queryResult
                 .Select(s => new
                 {
@@ -157,12 +188,13 @@ namespace Contact.Monitoring.Web.Controllers
         }
         public JsonResult GetMemoryUsage()
         {
-            var queryResult = _monitoringRepository.GetCounterValues(new[] { "available mbytes" });
+            var last24Hours = DateTime.UtcNow.AddHours(-24);
+            var queryResult = _monitoringRepository.GetCounterValues(new[] { "available mbytes" }, last24Hours);
             var result = queryResult
                 .Select(s => new
                 {
                     Time = s.Timestamp.ToString("yyyy-MM-dd HH"),
-                    CounterValue = 8000.0 - (double) s.CounterValue
+                    CounterValue = kMaxSystemMemoryMbytes - (double) s.CounterValue
                 })
                 .GroupBy(g => g.Time, (key, group) => new PerformanceCounterDataViewModel
                 {
@@ -173,5 +205,6 @@ namespace Contact.Monitoring.Web.Controllers
         }
 
         private readonly MonitoringRepository _monitoringRepository = new MonitoringRepository();
+        private readonly int kMaxSystemMemoryMbytes = 8000;
     }
 }

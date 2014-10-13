@@ -18,9 +18,10 @@
     <body>
         <header>
             <div class="content-wrapper">
-                <div class="float-left">
-                    <p class="site-title">@Html.ActionLink("Contact Service", "Monitoring", "Home")</p>
-                </div>
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="active">@Html.ActionLink("Overview", "Overview", "Home")</li>
+                    <li>@Html.ActionLink("Monitoring", "Monitoring", "Home")</li>
+                </ul>
             </div>
         </header>
         <div id="body">

@@ -40,5 +40,12 @@ namespace Contact.Monitoring.Web.Controllers
             return View();
         }
 
+        public ActionResult Overview()
+        {
+            ViewBag.Message = "Contact Service Overview.";
+
+            return View();
+        }
+
     }
 }

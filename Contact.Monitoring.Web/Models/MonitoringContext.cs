@@ -17,6 +17,7 @@ namespace Contact.Monitoring.Web.Models
         }
 
         public DbSet<PerformanceCounterData> PerformanceCounterDatas { get; set; }
+        public DbSet<SchedulerQueueCount> SchedulerQueueCounts { get; set; }
         public DbSet<ServiceStatu> ServiceStatus { get; set; }
         public DbSet<SystemDiskSpace> SystemDiskSpaces { get; set; }
         public DbSet<SystemUpTime> SystemUpTimes { get; set; }
@@ -24,6 +25,7 @@ namespace Contact.Monitoring.Web.Models
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Configurations.Add(new PerformanceCounterDataMap());
+            modelBuilder.Configurations.Add(new SchedulerQueueCountMap());
             modelBuilder.Configurations.Add(new ServiceStatuMap());
             modelBuilder.Configurations.Add(new SystemDiskSpaceMap());
             modelBuilder.Configurations.Add(new SystemUpTimeMap());
