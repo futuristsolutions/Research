@@ -8,7 +8,7 @@ namespace Contact.Monitoring.Web.Models.Mapping
         public PerformanceCounterDataMap()
         {
             // Primary Key
-            this.HasKey(t => new { t.Id, t.Timestamp, t.MachineName, t.Service, t.Counter, t.CounterValue });
+            this.HasKey(t => new { t.Id, t.Timestamp, t.MachineName, t.Service, t.InstanceName, t.Counter, t.CounterValue });
 
             // Properties
             this.Property(t => t.Id)
@@ -22,9 +22,13 @@ namespace Contact.Monitoring.Web.Models.Mapping
                 .IsRequired()
                 .HasMaxLength(50);
 
+            this.Property(t => t.InstanceName)
+                .IsRequired()
+                .HasMaxLength(100);
+
             this.Property(t => t.Counter)
                 .IsRequired()
-                .HasMaxLength(50);
+                .HasMaxLength(100);
 
             this.Property(t => t.CounterValue)
                 .HasDatabaseGeneratedOption(DatabaseGeneratedOption.None);
@@ -35,6 +39,7 @@ namespace Contact.Monitoring.Web.Models.Mapping
             this.Property(t => t.Timestamp).HasColumnName("Timestamp");
             this.Property(t => t.MachineName).HasColumnName("MachineName");
             this.Property(t => t.Service).HasColumnName("Service");
+            this.Property(t => t.InstanceName).HasColumnName("InstanceName");
             this.Property(t => t.Counter).HasColumnName("Counter");
             this.Property(t => t.CounterValue).HasColumnName("CounterValue");
         }

@@ -97,6 +97,16 @@ namespace Contact.Monitoring.Web.Repository
             }
         }
 
+        public List<PerformanceCounterData> GetCounterValues(string counter, string service, DateTime recordedAfterDateTime)
+        {
+            using (var context = new MonitoringContext())
+            {
+                return context.PerformanceCounterDatas
+                    .Where(c => counter.Contains(c.Counter) && c.Service == service &&  c.Timestamp > recordedAfterDateTime)
+                    .ToList();
+            }
+        }
+
         public PerformanceCounterData GetLastCounterValue(string service, string counter)
         {
             using (var context = new MonitoringContext())
@@ -106,6 +116,34 @@ namespace Contact.Monitoring.Web.Repository
                     .Where(c => counter == c.Counter && c.Service == service)
                     .Take(1)
                     .First();
+            }
+        }
+
+        public List<PerformanceCounterData> GetLastCounterValues(string counter)
+        {
+            using (var context = new MonitoringContext())
+            {
+                var result = (from counters in context.PerformanceCounterDatas
+                        where counters.Counter == counter
+                        group counters by new {counters.Service, counters.MachineName, counters.Counter}
+                        into countersGroup
+                        select new
+                        {
+                            countersGroup.Key.Counter, 
+                            countersGroup.Key.MachineName, 
+                            countersGroup.Key.Service,
+                            CounterValue = countersGroup.Max(c => c.CounterValue)
+                        })
+                        .ToList()
+                        .Select(s => new PerformanceCounterData
+                        {
+                            Counter = s.Counter,
+                            MachineName = s.MachineName,
+                            Service = s.Service,
+                            CounterValue = s.CounterValue
+                        })
+                        .ToList();
+                return result;
             }
         }
 
@@ -127,11 +165,11 @@ namespace Contact.Monitoring.Web.Repository
             }
         }
 
-        internal List<SchedulerQueueCount> GetLastSchedulerQueueCount()
+        internal List<SchedulerQueue> GetLastSchedulerQueueCount()
         {
             using (var context = new MonitoringContext())
             {
-                return context.SchedulerQueueCounts
+                return context.SchedulerQueues
                     .OrderByDescending(o => o.Id)
                     .Take(1)
                     .ToList();

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<UpdateCheckSettings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <LocalChecks />
+  <OnlineUpdateChecks>
+    <Check LastChecked="07/10/2014 10:08:51" Product="KENDOUIMVC" />
+  </OnlineUpdateChecks>
+  <SubscriptionCheck LastChecked="07/10/2014 10:17:22" />
+  <SolutionUpdateChecks>
+    <Check LastChecked="07/10/2014 10:08:59" Solution="D:\Projects\Research\Research\Contact.Monitoring.Web.sln" Product="KENDOUIMVC" />
+  </SolutionUpdateChecks>
+</UpdateCheckSettings>

@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using Contact.Monitoring.Web.Models;
-using Contact.Monitoring.Web.ViewModel;
-using Kendo.Mvc.UI;
-using Kendo.Mvc.Extensions;
+﻿using System.Web.Mvc;
+using Contact.Monitoring.Web.Services;
 
 namespace Contact.Monitoring.Web.Controllers
 {
@@ -43,8 +36,9 @@ namespace Contact.Monitoring.Web.Controllers
         public ActionResult Overview()
         {
             ViewBag.Message = "Contact Service Overview.";
-
-            return View();
+            var overviewService = new OverviewService();
+            var overviewModel = overviewService.GetOverview();
+            return View(overviewModel);
         }
 
     }

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserSettingCollection xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <UserSettings>
+    <UserSetting>
+      <Id>KendoUIMvcShouldUseInternalBuilds</Id>
+      <Value xsi:type="xsd:boolean">false</Value>
+    </UserSetting>
+    <UserSetting>
+      <Id>KendoUIMvcShouldCheckForOnlineUpdates</Id>
+      <Value xsi:type="xsd:boolean">true</Value>
+    </UserSetting>
+    <UserSetting>
+      <Id>ShouldAddDistributionToSolution</Id>
+      <Value xsi:type="xsd:boolean">false</Value>
+    </UserSetting>
+    <UserSetting>
+      <Id>DownloadFolderPath</Id>
+      <Value xsi:type="xsd:string">C:\Users\HC83\AppData\Roaming\Telerik\Updates</Value>
+    </UserSetting>
+    <UserSetting>
+      <Id>ProjectUpgradeNotificationsEnabled</Id>
+      <Value xsi:type="xsd:boolean">true</Value>
+    </UserSetting>
+    <UserSetting>
+      <Id>TrialToDevNotificationsEnabled</Id>
+      <Value xsi:type="xsd:boolean">true</Value>
+    </UserSetting>
+    <UserSetting>
+      <Id>ShouldCheckSubscription</Id>
+      <Value xsi:type="xsd:boolean">true</Value>
+    </UserSetting>
+  </UserSettings>
+</UserSettingCollection>

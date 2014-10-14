@@ -1,4 +1,4 @@
-﻿@model dynamic
+﻿@model Contact.Monitoring.Web.ViewModel.OverviewViewModel
 
 @{
     ViewBag.Title = "Overview";
@@ -12,10 +12,48 @@
 
     <div class="row"><p /></div>
     <div class="row">
-        <h3>Server <span class="glyphicon glyphicon-ok"></span></h3>
+        <h3>Server 
+            @if (Model.Servers.Status)
+            {
+                <i class="glyphicon glyphicon-ok"></i>
+            }
+            else
+            {
+                <i class="glyphicon glyphicon-remove-sign"></i>
+            }
+        </h3>
+        <p>@Model.Servers.Description</p>
     </div>
     <div class="row">
-        <h3>Health <span class="glyphicon glyphicon-ok"></span></h3>
+        <h3>Health 
+            @if (Model.Health.Status)
+            {
+                <span class="glyphicon glyphicon-ok"></span>
+            }
+            else
+            {
+                <span class="glyphicon glyphicon-remove-sign"></span>
+            }
+        </h3>
+        <p>@Model.Health.Description</p>
+    </div>
+    <div class="row"><p /></div>
+    <div class="row">
+        @(Html.Kendo().Grid(Model.ServiceOverview)
+                      .Name("kServiceOverview")
+                      .Columns(columns =>
+                      {
+                          columns.Bound(c => c.Category);
+                          columns.Bound(c => c.ThroughputAverage);
+                          columns.Bound(c => c.ThroughputMax);
+                          columns.Bound(c => c.LastTimeItRan);
+                          columns.Bound(c => c.Total);
+                      })
+                      .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .PageSize(4)
+                        .ServerOperation(false))
+        )
     </div>
 
 </div>
