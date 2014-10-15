@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.UI.WebControls;
-using Antlr.Runtime;
 using Contact.Monitoring.Web.Models;
-using Contact.Monitoring.Web.Repository;
 using Contact.Monitoring.Web.ViewModel;
-using Microsoft.Ajax.Utilities;
 
 namespace Contact.Monitoring.Web.Services
 {
@@ -14,54 +10,54 @@ namespace Contact.Monitoring.Web.Services
     {
         public OverviewViewModel GetOverview()
         {
-            var listenerSummary = GetSummary("Listener", "requests/second", "successful requests");
-            var schedulerSummary = GetSummary("Scheduler", "requests/second", "successful requests");
+            var listenerSummary = GetSummary("Listener", "Listener", "_all", "requests/second", "requests served");
+            var schedulerSummary = GetSummary("Push","Scheduler","_all", "requests/second", "requests served");
+            var registrationSummary = GetSummary("Registration", "WebApi", "manage push addresses for a contact", "requests/second", "requests served");
+            var preferenceSummary = GetSummary("Preference", "WebApi", "manage all topic channel preferences for a contact", "requests/second", "requests served");
+           
             return new OverviewViewModel
             {
                 Servers = GetServerStatus(),
                 Health = GetHealthStatus(),
                 ServiceOverview = new List<ServiceOverviewViewModel>()
                 {
-                    listenerSummary,schedulerSummary
+                    listenerSummary,schedulerSummary,registrationSummary,preferenceSummary
                 }
             };
         }
 
-        private ServiceOverviewViewModel GetSummary(string category, string throughputCounter, string totalCounter)
+        private ServiceOverviewViewModel GetSummary(string displayName, string service, string instance, string throughputCounter, string totalCounter)
         {
-            var monitoringRepository = new MonitoringRepository();
-            var listenerRequestPerSecond = monitoringRepository.GetCounterValues(throughputCounter, category, DateTime.UtcNow.AddHours(-1));
-            var listenerSuccesfulRequests = monitoringRepository.GetCounterValues(totalCounter, category, DateTime.UtcNow.AddHours(-1));
-            var maxValue = listenerRequestPerSecond.Max(l => l.CounterValue);
-            var avgValue = listenerRequestPerSecond.Average(l => l.CounterValue);
-            var lastEntry = listenerRequestPerSecond.OrderBy(l => l.Id).Take(1).FirstOrDefault();
-            var lastSuccesfulRequest = listenerSuccesfulRequests.OrderBy(l => l.Id).Take(1).FirstOrDefault();
+            var performanceDataProvider = new PerformanceDataProvider();
+            var requestsPerSecond = performanceDataProvider.GetCounterValues(instance, throughputCounter, service, DateTime.UtcNow.AddHours(-1));
+            var requestsPerSecondPerServer = requestsPerSecond.GroupBy(t => new { t.MachineName }, (key, group) =>
+                         new
+                         {
+                             key.MachineName,
+                             CounterValue = group.Max(g => g.CounterValue),
+                             TimeStamp = group.Max(g => g.Timestamp)
+                         }).ToList();
+            var totalRequests = performanceDataProvider.GetCounterValues(instance, totalCounter, service, DateTime.UtcNow.AddHours(-1));
+            var totalRequestsPerServer = totalRequests.GroupBy(t => new {t.MachineName}, (key,group) =>
+                         new
+                         {
+                            key.MachineName,
+                            CounterValue = group.Max(g => g.CounterValue),
+                            TimeStamp = group.Max(g => g.Timestamp)
+                         }).ToList();
+            var maxValue = requestsPerSecondPerServer.Any() ? requestsPerSecond.Max(l => l.CounterValue) : 0.0m;
+            var avgValue = requestsPerSecondPerServer.Any() ? requestsPerSecond.Average(l => l.CounterValue) : 0.0m;
+            var lastTimeItRan = requestsPerSecondPerServer.Any()
+                ? requestsPerSecondPerServer.Max(t => t.TimeStamp) : new DateTime();
+            var lastSuccesfulRequest = totalRequestsPerServer.Any() 
+                ? totalRequestsPerServer.Sum(t => t.CounterValue) : 0.0m;
             return new ServiceOverviewViewModel
             {
-                Category = category,
-                LastTimeItRan = lastEntry.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
-                ThroughputMax = maxValue.ToString(),
-                ThroughputAverage = avgValue.ToString(),
-                Total = lastSuccesfulRequest.CounterValue.ToString()
-            };
-        }
-
-        private ServiceOverviewViewModel GetListenerSummary()
-        {
-            var monitoringRepository = new MonitoringRepository();
-            var listenerRequestPerSecond = monitoringRepository.GetCounterValues("requests/second", "Listener", DateTime.UtcNow.AddHours(-1));
-            var listenerSuccesfulRequests = monitoringRepository.GetCounterValues("successful requests", "Listener", DateTime.UtcNow.AddHours(-1));
-            var maxValue = listenerRequestPerSecond.Max(l => l.CounterValue);
-            var avgValue = listenerRequestPerSecond.Average(l => l.CounterValue);
-            var lastEntry = listenerRequestPerSecond.OrderBy(l => l.Id).Take(1).FirstOrDefault();
-            var lastSuccesfulRequest = listenerSuccesfulRequests.OrderBy(l => l.Id).Take(1).FirstOrDefault();
-            return new ServiceOverviewViewModel
-            {
-                Category = "Listener",
-                LastTimeItRan = lastEntry.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
-                ThroughputMax = maxValue.ToString(),
-                ThroughputAverage = avgValue.ToString(),
-                Total = lastSuccesfulRequest.CounterValue.ToString()
+                Category = displayName,
+                LastTimeItRan = lastTimeItRan.ToString("yyyy-MM-dd HH:mm:ss"),
+                ThroughputMax = maxValue.ToString("N2"),
+                ThroughputAverage = avgValue.ToString("N2"),
+                Total = lastSuccesfulRequest.ToString("N2")
             };
         }
 
@@ -102,8 +98,8 @@ namespace Contact.Monitoring.Web.Services
 
         private bool IsServerContactable(DateTime contactedAfterDateTime)
         {
-            var monitoringRepository = new MonitoringRepository();
-            var systemUpTimes = monitoringRepository.GetAllSystemUpTimes();
+            var systemDataProvider = new SystemDataProvider();
+            var systemUpTimes = systemDataProvider.GetAllSystemUpTimes();
             var result =  (from s in systemUpTimes
                 where s.LastUpdatedDateTime > contactedAfterDateTime
                 select s).ToList();
@@ -112,8 +108,8 @@ namespace Contact.Monitoring.Web.Services
 
         private bool IsDiskFreeSpaceBelowThreshold(double freeSpaceThreshold)
         {
-            var monitoringRepository = new MonitoringRepository();
-            var diskUsages = monitoringRepository.GetAllSystemDiskUsage();
+            var systemDataProvider = new SystemDataProvider();
+            var diskUsages = systemDataProvider.GetAllSystemDiskUsage();
 
             var result = (from d in diskUsages
                 where (((double) d.FreeSpace/(double) d.Size)*100.0) < freeSpaceThreshold 
@@ -122,11 +118,12 @@ namespace Contact.Monitoring.Web.Services
             return result.Any();
         }
         
-        private bool ValidateCounterValueThreshold(string counter, Func<PerformanceCounterData, bool> validator)
+        private bool ValidateCounterValueThreshold(string counter, Func<LastPerformanceCounterData, bool> validator)
         {
-            var monitoringRepository = new MonitoringRepository();
+            var monitoringRepository = new PerformanceDataProvider();
             var result = monitoringRepository.GetLastCounterValues(counter)
-                .Where(validator);
+                .Where(validator)
+                .ToList();
             return result.Any();
         }
 

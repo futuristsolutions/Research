@@ -182,6 +182,8 @@
     <Compile Include="Models\SchedulerQueue.cs" />
     <Compile Include="Models\SchedulerQueuePending.cs" />
     <Compile Include="Services\OverviewService.cs" />
+    <Compile Include="Services\PerformanceDataProvider.cs" />
+    <Compile Include="Services\SystemDataProvider.cs" />
     <Compile Include="ViewModel\OverviewViewModel.cs" />
     <Compile Include="ViewModel\SchedulerQueueCountViewModel.cs" />
     <Compile Include="ViewModel\SystemDiskSpaceViewModel.cs" />
@@ -189,7 +191,6 @@
     <Compile Include="Models\Mapping\SystemDiskSpaceMap.cs" />
     <Compile Include="Models\ServiceStatu.cs" />
     <Compile Include="Models\SystemDiskSpace.cs" />
-    <Compile Include="Repository\MonitoringRepository.cs" />
     <Compile Include="ViewModel\ServiceStatuViewModel.cs" />
     <Compile Include="ViewModel\PerformanceCounterDataViewModel.cs" />
     <Compile Include="Global.asax.cs">
@@ -772,6 +773,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Repository\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
