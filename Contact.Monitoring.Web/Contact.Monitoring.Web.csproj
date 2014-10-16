@@ -186,6 +186,7 @@
     <Compile Include="Services\SystemDataProvider.cs" />
     <Compile Include="ViewModel\OverviewViewModel.cs" />
     <Compile Include="ViewModel\SchedulerQueueCountViewModel.cs" />
+    <Compile Include="ViewModel\SchedulerQueuePending.cs" />
     <Compile Include="ViewModel\SystemDiskSpaceViewModel.cs" />
     <Compile Include="Models\Mapping\ServiceStatuMap.cs" />
     <Compile Include="Models\Mapping\SystemDiskSpaceMap.cs" />

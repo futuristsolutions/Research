@@ -44,5 +44,16 @@ namespace Contact.Monitoring.Web.Services
                     .ToList();
             }
         }
+
+
+        internal List<SchedulerQueuePending> GetSchedulerQueuePending()
+        {
+            using (var context = new MonitoringContext())
+            {
+                return context.SchedulerQueuePendings
+                     .OrderBy(o => o.PendingFrom)
+                     .ToList();
+            }
+        }
     }
 }

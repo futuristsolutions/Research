@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Contact.Monitoring.Web.Controllers;
+using Contact.Monitoring.Web.Models;
 using Contact.Monitoring.Web.Repository;
 using Contact.Monitoring.Web.Services;
 
@@ -17,6 +18,7 @@ namespace Contact.Monitoring.Web.ViewModel
         public List<LastPerformanceCounterData> MemoryThresholdViolations { get; set; }
         public List<LastPerformanceCounterData> CpuThresholdViolations { get; set; }
         public List<ServiceStatuViewModel> ServicesNotRunning { get; set; }
+        public List<SchedulerQueuePendingViewModel> PendingScheduleMessages { get; set; }
     }
 
     public class StatusViewModel

@@ -130,6 +130,23 @@
                                         .ServerOperation(false))
             )
         }
+        @if (Model.PendingScheduleMessages.Any())
+        {
+            <p>Pending scheduler messages</p>
+            @(Html.Kendo().Grid(Model.PendingScheduleMessages)
+                                          .Name("kPendingScheduleMessages")
+                                      .Columns(columns =>
+                                      {
+                                          columns.Bound(c => c.LastUpdatedDateTime);
+                                          columns.Bound(c => c.PendingFrom);
+                                          columns.Bound(c => c.QueueCount);
+                                      })
+                                      .DataSource(dataSource => dataSource
+                                        .Ajax()
+                                        .PageSize(4)
+                                        .ServerOperation(false))
+            )
+        }
     </div>
     <div class="row"><p /></div>
     <div class="row">

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Contact.Monitoring.Web.Controllers;
+using Contact.Monitoring.Web.Models;
 using Contact.Monitoring.Web.Repository;
 using Contact.Monitoring.Web.ViewModel;
 
@@ -15,6 +16,7 @@ namespace Contact.Monitoring.Web.Services
             var servicesNotRunning = GetServicesNotRunning();
             var lastContactedAfter = DateTime.UtcNow.AddMinutes(-ServerLastContactMinutes);
             var serversNotContactable = GetServerNotContactable(lastContactedAfter);
+            var pendingScheduleMessages = GetPendingScheduleMessages();
             var last1Hour = DateTime.UtcNow.AddHours(-1);
             var memoryThresholdViolations = GetLastCounterValueViolatesThreshold("available mbytes",
                          (p) => (double)p.CounterValue < MinAvailableMemoryThreshold, last1Hour);
@@ -32,14 +34,27 @@ namespace Contact.Monitoring.Web.Services
                 SystemDiskSpaceViolations = diskThresholdViolation,
                 ServersNotContactable = serversNotContactable,
                 ServicesNotRunning = servicesNotRunning,
-                Health = GetHealthStatus(memoryThresholdViolations.Any(), cpuThresholdViolations.Any()),
+                PendingScheduleMessages = pendingScheduleMessages,
+                Health = GetHealthStatus(memoryThresholdViolations.Any(), cpuThresholdViolations.Any(), pendingScheduleMessages.Any()),
                 MemoryThresholdViolations = memoryThresholdViolations,
                 CpuThresholdViolations = cpuThresholdViolations,
                 ServiceOverview = new List<ServiceOverviewViewModel>()
                 {
-                    listenerSummary,schedulerSummary,registrationSummary,preferenceSummary
+                    registrationSummary,preferenceSummary,listenerSummary,schedulerSummary
                 }
             };
+        }
+
+        private List<SchedulerQueuePendingViewModel> GetPendingScheduleMessages()
+        {
+            var systemDataProvider = new SystemDataProvider();
+            return systemDataProvider.GetSchedulerQueuePending()
+                .Select(s => new SchedulerQueuePendingViewModel
+                {
+                    LastUpdatedDateTime = s.LastUpdatedDateTime.ToString(DataTimeFormatString),
+                    PendingFrom = s.PendingFrom.ToString(DataTimeFormatString),
+                    QueueCount = s.QueueCount
+                }).ToList();
         }
 
         private List<ServiceStatuViewModel> GetServicesNotRunning()
@@ -95,16 +110,17 @@ namespace Contact.Monitoring.Web.Services
             };
         }
 
-        private StatusViewModel GetHealthStatus(bool isMemoryThresholdViolated, bool isCpuThresholdViolated)
+        private StatusViewModel GetHealthStatus(bool isMemoryThresholdViolated, bool isCpuThresholdViolated, bool isAnyPendingScheduleMessages)
         {
              var statusMessage = new List<string>
             {
                 isMemoryThresholdViolated ? string.Format("Some of the server(s) have below threshold available memory ( < {0} )",MinAvailableMemoryThreshold): string.Empty,
-                isCpuThresholdViolated ? string.Format("Some of the server(s) above threshold of CPU usage ( > {0} )",MaxCpuUsageThreshold): string.Empty
+                isCpuThresholdViolated ? string.Format("Some of the server(s) above threshold of CPU usage ( > {0} )",MaxCpuUsageThreshold): string.Empty,
+                isAnyPendingScheduleMessages ? string.Format("Undelivered messages in scheduler queue"): string.Empty
             };
             return new StatusViewModel
             {
-                Status = !isMemoryThresholdViolated && !isCpuThresholdViolated,
+                Status = !isMemoryThresholdViolated && !isCpuThresholdViolated && !isAnyPendingScheduleMessages,
                 Description = string.Join(",", statusMessage.Where(s => s.Length > 0))
             };
         }
@@ -117,9 +133,10 @@ namespace Contact.Monitoring.Web.Services
                 isServersNotContactable ? string.Format("Some of the server(s) not contactable ( in the last {0} minutes )",ServerLastContactMinutes): string.Empty,
                 isServiceNotRunning ? string.Format("Some of services not running"): string.Empty
             };
+            
             var serverStatus = new StatusViewModel
             {
-                Status = !isDiskBelowThreshold && !isServersNotContactable,
+                Status = !isDiskBelowThreshold && !isServersNotContactable && !isServiceNotRunning ,
                 Description = string.Join(",", serversStatusMessage.Where(s => s.Length > 0))
             };
             return serverStatus;
