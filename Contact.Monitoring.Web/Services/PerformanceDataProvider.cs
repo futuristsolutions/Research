@@ -111,12 +111,12 @@ namespace Contact.Monitoring.Web.Services
             }
         }
 
-        public List<LastPerformanceCounterData> GetLastCounterValues(string counter)
+        public List<LastPerformanceCounterData> GetMaxCounterValues(string counter, DateTime dateTimeAfter)
         {
             using (var context = new MonitoringContext())
             {
                 var result = (from counters in context.PerformanceCounterDatas
-                    where counters.Counter == counter
+                              where counters.Counter == counter && counters.Timestamp > dateTimeAfter
                     group counters by new { counters.Service, counters.MachineName, counters.Counter }
                     into countersGroup
                     select new
@@ -133,8 +133,9 @@ namespace Contact.Monitoring.Web.Services
                         MachineName = s.MachineName,
                         Service = s.Service,
                         CounterValue = s.CounterValue
-                    });
-                return result.ToList();
+                    })
+                    .ToList();
+                return result;
             }
         }
 

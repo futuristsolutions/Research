@@ -1,4 +1,5 @@
-﻿@model Contact.Monitoring.Web.ViewModel.OverviewViewModel
+﻿@using Kendo.Mvc
+@model Contact.Monitoring.Web.ViewModel.OverviewViewModel
 
 @{
     ViewBag.Title = "Overview";
@@ -23,6 +24,63 @@
             }
         </h3>
         <p>@Model.Servers.Description</p>
+        @if (Model.SystemDiskSpaceViolations.Any())
+        {
+            <p>Servers with disk free space violations</p>
+            @(Html.Kendo().Grid(Model.SystemDiskSpaceViolations)
+                                      .Name("kSystemDiskSpaceViolations")
+                                      .Columns(columns =>
+                                      {
+                                          columns.Bound(c => c.MachineName);
+                                          columns.Bound(c => c.Service);
+                                          columns.Bound(c => c.Drive);
+                                          columns.Bound(c => c.Size);
+                                          columns.Bound(c => c.FreeSpace);
+                                      })
+                                      .DataSource(dataSource => dataSource
+                                        .Ajax()
+                                        .PageSize(4)
+                                        .ServerOperation(false))
+            )
+        }
+        @if (Model.ServersNotContactable.Any())
+        {
+            <p>Servers not contactable</p>
+            @(Html.Kendo().Grid(Model.ServersNotContactable)
+                                      .Name("kServersNotContactable")
+                                      .Columns(columns =>
+                                      {
+                                          columns.Bound(c => c.MachineName);
+                                          columns.Bound(c => c.Service);
+                                          columns.Bound(c => c.LastUpdatedDateTime).Title("Last Contacted");
+                                      })
+                                      .DataSource(dataSource => dataSource
+                                        .Ajax()
+                                        .PageSize(4)
+                                        .ServerOperation(false))
+            )
+        }
+        
+        @if (Model.ServicesNotRunning.Any())
+        {
+            <p>Services not running</p>
+            @(Html.Kendo().Grid(Model.ServicesNotRunning)
+                                           .Name("kServicesNotRunning")
+                                          .Columns(columns =>
+                                          {
+                                              columns.Bound(c => c.MachineName);
+                                              columns.Bound(c => c.Service);
+                                              columns.Bound(c => c.LastUpdatedDateTime);
+                                              columns.Bound(c => c.Status);
+                                              columns.Bound(c => c.Instance);
+                                          })
+                                          .DataSource(dataSource => dataSource
+                                            .Ajax()
+                                            .PageSize(4)
+                                            .ServerOperation(false))
+            )
+        }
+
     </div>
     <div class="row">
         <h3>Health 
@@ -36,24 +94,61 @@
             }
         </h3>
         <p>@Model.Health.Description</p>
+        @if (Model.CpuThresholdViolations.Any())
+        {
+            <p>CPU Threshold violations</p>
+            @(Html.Kendo().Grid(Model.CpuThresholdViolations)
+                                      .Name("kCpuThresholdViolations")
+                                      .Columns(columns =>
+                                      {
+                                          columns.Bound(c => c.MachineName);
+                                          columns.Bound(c => c.Service);
+                                          columns.Bound(c => c.Counter);
+                                          columns.Bound(c => c.CounterValue);
+                                      })
+                                      .DataSource(dataSource => dataSource
+                                        .Ajax()
+                                        .PageSize(4)
+                                        .ServerOperation(false))
+            )
+        }
+        @if (Model.MemoryThresholdViolations.Any())
+        {
+            <p>Memory Threshold violations</p>
+            @(Html.Kendo().Grid(Model.MemoryThresholdViolations)
+                                      .Name("kMemoryThresholdViolations")
+                                      .Columns(columns =>
+                                      {
+                                          columns.Bound(c => c.MachineName);
+                                          columns.Bound(c => c.Service);
+                                          columns.Bound(c => c.Counter);
+                                          columns.Bound(c => c.CounterValue);
+                                      })
+                                      .DataSource(dataSource => dataSource
+                                        .Ajax()
+                                        .PageSize(4)
+                                        .ServerOperation(false))
+            )
+        }
     </div>
     <div class="row"><p /></div>
     <div class="row">
-        @(Html.Kendo().Grid(Model.ServiceOverview)
-                      .Name("kServiceOverview")
-                      .Columns(columns =>
-                      {
-                          columns.Bound(c => c.Category);
-                          columns.Bound(c => c.ThroughputAverage);
-                          columns.Bound(c => c.ThroughputMax);
-                          columns.Bound(c => c.LastTimeItRan);
-                          columns.Bound(c => c.Total);
-                      })
-                      .DataSource(dataSource => dataSource
-                        .Ajax()
-                        .PageSize(4)
-                        .ServerOperation(false))
-        )
-    </div>
+        <h3> Throughput </h3>
+            @(Html.Kendo().Grid(Model.ServiceOverview)
+              .Name("kServiceOverview")
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.Category);
+                  columns.Bound(c => c.ThroughputAverage);
+                  columns.Bound(c => c.ThroughputMax);
+                  columns.Bound(c => c.LastTimeItRan);
+                  columns.Bound(c => c.Total);
+              })
+              .DataSource(dataSource => dataSource
+                  .Ajax()
+                  .PageSize(4)
+                  .ServerOperation(false))
+            )
+</div>
 
 </div>
