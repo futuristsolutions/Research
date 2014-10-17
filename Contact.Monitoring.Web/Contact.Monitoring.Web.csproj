@@ -175,35 +175,10 @@
   <ItemGroup>
     <Compile Include="Controllers\DataProviderController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Models\AddressBook.cs" />
-    <Compile Include="Models\Mapping\AddressBookMap.cs" />
-    <Compile Include="Models\Mapping\SchedulerQueueMap.cs" />
-    <Compile Include="Models\Mapping\SchedulerQueuePendingMap.cs" />
-    <Compile Include="Models\SchedulerQueue.cs" />
-    <Compile Include="Models\SchedulerQueuePending.cs" />
-    <Compile Include="Services\OverviewService.cs" />
-    <Compile Include="Services\PerformanceDataProvider.cs" />
-    <Compile Include="Services\SystemDataProvider.cs" />
-    <Compile Include="ViewModel\OverviewViewModel.cs" />
-    <Compile Include="ViewModel\SchedulerQueueCountViewModel.cs" />
-    <Compile Include="ViewModel\SchedulerQueuePending.cs" />
-    <Compile Include="ViewModel\SystemDiskSpaceViewModel.cs" />
-    <Compile Include="Models\Mapping\ServiceStatuMap.cs" />
-    <Compile Include="Models\Mapping\SystemDiskSpaceMap.cs" />
-    <Compile Include="Models\ServiceStatu.cs" />
-    <Compile Include="Models\SystemDiskSpace.cs" />
-    <Compile Include="ViewModel\ServiceStatuViewModel.cs" />
-    <Compile Include="ViewModel\PerformanceCounterDataViewModel.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\Mapping\PerformanceCounterDataMap.cs" />
-    <Compile Include="Models\Mapping\SystemUpTimeMap.cs" />
-    <Compile Include="Models\MonitoringContext.cs" />
-    <Compile Include="Models\PerformanceCounterData.cs" />
-    <Compile Include="Models\SystemUpTime.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ViewModel\SystemUpTimeViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-theme.css" />
@@ -778,6 +753,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Contact.Monitoring\Contact.Monitoring.csproj">
+      <Project>{8bc5ab52-e67f-4a24-bf56-a7f1aa45b851}</Project>
+      <Name>Contact.Monitoring</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

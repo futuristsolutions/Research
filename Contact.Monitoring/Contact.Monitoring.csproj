@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8BC5AB52-E67F-4A24-BF56-A7F1AA45B851}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Contact.Monitoring</RootNamespace>
+    <AssemblyName>Contact.Monitoring</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EntityFramework">
+      <HintPath>..\packages\EntityFramework.5.0.0\lib\net40\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Models\AddressBook.cs" />
+    <Compile Include="Models\Mapping\AddressBookMap.cs" />
+    <Compile Include="Models\Mapping\PerformanceCounterDataMap.cs" />
+    <Compile Include="Models\Mapping\SchedulerQueueMap.cs" />
+    <Compile Include="Models\Mapping\SchedulerQueuePendingMap.cs" />
+    <Compile Include="Models\Mapping\ServiceStatuMap.cs" />
+    <Compile Include="Models\Mapping\SystemDiskSpaceMap.cs" />
+    <Compile Include="Models\Mapping\SystemUpTimeMap.cs" />
+    <Compile Include="Models\MonitoringContext.cs" />
+    <Compile Include="Models\PerformanceCounterData.cs" />
+    <Compile Include="Models\SchedulerQueue.cs" />
+    <Compile Include="Models\SchedulerQueuePending.cs" />
+    <Compile Include="Models\ServiceStatu.cs" />
+    <Compile Include="Models\SystemDiskSpace.cs" />
+    <Compile Include="Models\SystemUpTime.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\MaxPerformanceCounterData.cs" />
+    <Compile Include="ViewModel\MaxPerformanceCounterDataViewModel.cs" />
+    <Compile Include="Services\OverviewService.cs" />
+    <Compile Include="Services\PerformanceDataProvider.cs" />
+    <Compile Include="Services\SystemDataProvider.cs" />
+    <Compile Include="ViewModel\OverviewViewModel.cs" />
+    <Compile Include="ViewModel\PerformanceCounterDataViewModel.cs" />
+    <Compile Include="ViewModel\SchedulerQueueCountViewModel.cs" />
+    <Compile Include="ViewModel\SchedulerQueuePendingViewModel.cs" />
+    <Compile Include="ViewModel\ServiceOverviewViewModel.cs" />
+    <Compile Include="ViewModel\ServiceStatuViewModel.cs" />
+    <Compile Include="ViewModel\StatusViewModel.cs" />
+    <Compile Include="ViewModel\SystemDiskSpaceViewModel.cs" />
+    <Compile Include="ViewModel\SystemUpTimeViewModel.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

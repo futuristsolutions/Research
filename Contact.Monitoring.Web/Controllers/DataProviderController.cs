@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
-using Contact.Monitoring.Web.Models;
-using Contact.Monitoring.Web.Repository;
-using Contact.Monitoring.Web.Services;
-using Contact.Monitoring.Web.ViewModel;
+using Contact.Monitoring.Models;
+using Contact.Monitoring.Services;
+using Contact.Monitoring.ViewModel;
 using Kendo.Mvc.Extensions;
 using Kendo.Mvc.UI;
 

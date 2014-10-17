@@ -1,5 +1,5 @@
 ﻿using System.Web.Mvc;
-using Contact.Monitoring.Web.Services;
+using Contact.Monitoring.Services;
 
 namespace Contact.Monitoring.Web.Controllers
 {
