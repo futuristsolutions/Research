@@ -6,7 +6,8 @@
         public string Timestamp { get; set; }
         public string MachineName { get; set; }
         public string Service { get; set; }
+        public string InstanceName { get; set; }
         public string Counter { get; set; }
-        public double CounterValue { get; set; }
+        public string CounterValue { get; set; }
     }
 }

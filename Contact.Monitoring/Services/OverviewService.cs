@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
 using Contact.Monitoring.ViewModel;
 
 namespace Contact.Monitoring.Services
@@ -114,7 +115,7 @@ namespace Contact.Monitoring.Services
                 isMemoryThresholdViolated ? string.Format("Some of the server(s) have below threshold available memory ( < {0} )",MinAvailableMemoryThreshold): string.Empty,
                 isCpuThresholdViolated ? string.Format("Some of the server(s) above threshold of CPU usage ( > {0} )",MaxCpuUsageThreshold): string.Empty,
                 isAnyPendingScheduleMessages ? string.Format("Undelivered messages in scheduler queue"): string.Empty
-            }).Select(s => s.Length > 0));
+            }).Where(s => s.Length > 0));
             return new StatusViewModel
             {
                 Status = string.IsNullOrWhiteSpace(healthStatusDescription),
@@ -129,7 +130,7 @@ namespace Contact.Monitoring.Services
                 isDiskBelowThreshold ? string.Format("Some of the server(s) have below threshold free disk space ( < {0} percentage free )",MinDiskFreeSpaceThresholdPercentage): string.Empty,
                 isServersNotContactable ? string.Format("Some of the server(s) not contactable ( in the last {0} minutes )",ServerLastContactMinutes): string.Empty,
                 isServiceNotRunning ? string.Format("Some of services not running"): string.Empty
-            }).Select(s => s.Length > 0)).Trim();
+            }).Where(s => s.Length > 0)).Trim();
             
             var serverStatus = new StatusViewModel
             {
@@ -147,13 +148,7 @@ namespace Contact.Monitoring.Services
                           where s.LastUpdatedDateTime < contactedAfterDateTime
                           select s)
                           .ToList()
-                          .Select(s => new SystemUpTimeViewModel
-                          {
-                              LastBootUpTime = s.LastBootUpTime.ToString(DataTimeFormatString),
-                              MachineName = s.MachineName,
-                              Service = s.Service,
-                              LastUpdatedDateTime = s.LastUpdatedDateTime.ToString(DataTimeFormatString)
-                          })
+                          .Select(Mapper.Map<SystemUpTimeViewModel>)
                           .ToList();
             return result;
         }
@@ -168,15 +163,7 @@ namespace Contact.Monitoring.Services
                           where (((double)d.FreeSpace / (double)d.Size) * 100.0) < freeSpaceThreshold
                           select d)
                           .ToList()
-                          .Select(s=>new SystemDiskSpaceViewModel
-                          {
-                              Service = s.Service,
-                              MachineName = s.MachineName,
-                              Drive = s.Drive,
-                              FreeSpace = s.FreeSpace,
-                              LastUpdatedDateTime = s.LastUpdatedDateTime.ToString(DataTimeFormatString),
-                              Size = s.Size
-                          })
+                          .Select(Mapper.Map<SystemDiskSpaceViewModel>)
                           .ToList();
             return result;
         }
@@ -188,14 +175,7 @@ namespace Contact.Monitoring.Services
             var result = monitoringRepository.GetMaxCounterValues(counter, dateTimeAfter)
                 .Where(validator)
                 .ToList()
-                .Select(s => 
-                new MaxPerformanceCounterDataViewModel
-                {
-                    Counter = s.Counter,
-                    CounterValue = s.CounterValue,
-                    MachineName = s.MachineName,
-                    Service = s.Service
-                })
+                .Select(Mapper.Map<MaxPerformanceCounterDataViewModel>)
                 .ToList();
             return result;
         }

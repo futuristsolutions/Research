@@ -34,6 +34,7 @@ namespace Contact.Monitoring.Web
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
+            AutoMapperConfig.Configure();
 
             RegisterGlobalFilters(GlobalFilters.Filters);
             RegisterRoutes(RouteTable.Routes);

@@ -71,7 +71,7 @@
         <div class="col-lg-6">
             <h4>Scheduler (Pending)</h4>
             <div>
-                @(Html.Kendo().Grid<SchedulerQueueCountViewModel>()
+                @(Html.Kendo().Grid<SchedulerQueueViewModel>()
                       .Name("kSchedulerPendingMessageCount")
                       .Columns(columns =>
                       {
@@ -178,7 +178,7 @@
     </div>
     <div class="row"><p /></div>
     <div class="row">
-        @(Html.Kendo().Chart<PerformanceCounterDataViewModel>()
+        @(Html.Kendo().Chart<PerformanceCounterStatisticsViewModel>()
               .Name("chart-cpuusage")
               .Title("%CPU Usage")
               .Legend(legend => legend
@@ -213,7 +213,7 @@
     </div>
     <div class="row"><p /></div>
     <div class="row">
-        @(Html.Kendo().Chart<PerformanceCounterDataViewModel>()
+        @(Html.Kendo().Chart<PerformanceCounterStatisticsViewModel>()
               .Name("chart-memoryusage")
               .Title("Memory Usage")
               .Legend(legend => legend
@@ -247,7 +247,7 @@
     
     <div class="row"><p /></div>
     <div class="row">
-        @(Html.Kendo().Chart<PerformanceCounterDataViewModel>()
+        @(Html.Kendo().Chart<PerformanceCounterStatisticsViewModel>()
               .Name("chart-notification")
               .Title("Notification")
               .Legend(legend => legend

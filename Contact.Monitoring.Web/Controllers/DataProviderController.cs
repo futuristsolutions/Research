@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
+using AutoMapper;
 using Contact.Monitoring.Models;
 using Contact.Monitoring.Services;
 using Contact.Monitoring.ViewModel;
@@ -53,7 +54,7 @@ namespace Contact.Monitoring.Web.Controllers
                     Timestamp = r.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
                     MachineName = r.MachineName,
                     Counter = "Push",
-                    CounterValue = (double) r.CounterValue
+                    CounterValue = r.CounterValue.ToString("N2")
                 });
             return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
@@ -62,14 +63,7 @@ namespace Contact.Monitoring.Web.Controllers
         {
             var queryResult = _performanceDataProvider.GetLastCounterValueByService("Scheduler", "successful requests");
             var result = queryResult
-                .Select(r => new PerformanceCounterDataViewModel
-                {
-                    Service = r.Service,
-                    Timestamp = r.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
-                    MachineName = r.MachineName,
-                    Counter = "Push",
-                    CounterValue = (double)r.CounterValue
-                });
+                .Select(Mapper.Map<PerformanceCounterDataViewModel>);
             return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
         
@@ -77,11 +71,7 @@ namespace Contact.Monitoring.Web.Controllers
         {
             var queryResult = _systemDataProvider.GetLastSchedulerQueueCount();
             var result = queryResult
-                .Select(r => new SchedulerQueueCountViewModel
-                {
-                    LastUpdatedDateTime = r.LastUpdatedDateTime.ToString("yyyy-MM-dd HH:mm:ss"),
-                    QueueCount = r.QueueCount
-                });
+                .Select(Mapper.Map<SchedulerQueueViewModel>);
             return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
 
@@ -105,7 +95,7 @@ namespace Contact.Monitoring.Web.Controllers
                         Timestamp = s.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
                         MachineName = s.MachineName,
                         Counter = s.Counter,
-                        CounterValue = (double)s.Value
+                        CounterValue = s.Value.ToString("N2")
                     })
                     .ToList();
 
@@ -123,14 +113,7 @@ namespace Contact.Monitoring.Web.Controllers
                 _performanceDataProvider.GetLastCounterValue("Listener", "% processor time"),
                 _performanceDataProvider.GetLastCounterValue("Listener", "available mbytes"),
             };
-            var result = queryResult.Select(s => new PerformanceCounterDataViewModel
-                    {
-                        Service = s.Service,
-                        Timestamp = s.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
-                        MachineName = s.MachineName,
-                        Counter = s.Counter,
-                        CounterValue = (double)s.CounterValue
-                    })
+            var result = queryResult.Select(Mapper.Map<PerformanceCounterDataViewModel>)
                     .ToList();
             return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
@@ -139,15 +122,7 @@ namespace Contact.Monitoring.Web.Controllers
         {
             var queryResult = _systemDataProvider.GetAllServiceStatus();
             var result = queryResult
-                    
-                    .Select(s => new ServiceStatuViewModel
-                    {
-                        Service = s.Service,
-                        LastUpdatedDateTime = s.LastUpdatedDateTime.ToString("yyyy-MM-dd HH:mm:ss"),
-                        MachineName = s.MachineName,
-                        Instance = s.Instance,
-                        Status = s.Status
-                    });
+                    .Select(Mapper.Map<ServiceStatuViewModel>);
 
             return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
@@ -157,19 +132,11 @@ namespace Contact.Monitoring.Web.Controllers
             var last1Hour = DateTime.UtcNow.AddHours(-1);
             var queryResult = _performanceDataProvider.GetAllCounterValues(last1Hour);
             var result = queryResult
-                .Select(s => new PerformanceCounterDataViewModel
-                {
-                    Service = s.Service,
-                    Id = s.Id,
-                    Timestamp = s.Timestamp.ToString("yyyy-MM-dd HH:mm:ss"),
-                    MachineName = s.MachineName,
-                    Counter = s.Counter,
-                    CounterValue = (double) s.CounterValue
-                });
+                .Select(Mapper.Map<PerformanceCounterDataViewModel>);
             return Json(result.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult GetCounterValuesByMachine(string counter)
+        public JsonResult GetCounterValuesByMachine(string counter, string machine)
         {
             var last24Hours = DateTime.UtcNow.AddHours(-24);
             var queryResult = _performanceDataProvider.GetCounterValues(new[] { counter }, last24Hours);
@@ -179,13 +146,15 @@ namespace Contact.Monitoring.Web.Controllers
                     Time = s.Timestamp.ToString("yyyy-MM-dd HH"),
                     CounterValue = (double) s.CounterValue
                 })
-                .GroupBy(g => g.Time, (key, group) => new PerformanceCounterDataViewModel
+                .GroupBy(g => g.Time, (key, group) => new PerformanceCounterStatisticsViewModel
                 {
                     Timestamp = key,
                     CounterValue = group.Max(g => g.CounterValue)
-                });
+                })
+                .ToList();
             return Json(result, JsonRequestBehavior.AllowGet);
         }
+
         public JsonResult GetMemoryUsage()
         {
             var last24Hours = DateTime.UtcNow.AddHours(-24);
@@ -194,16 +163,16 @@ namespace Contact.Monitoring.Web.Controllers
                 .Select(s => new
                 {
                     Time = s.Timestamp.ToString("yyyy-MM-dd HH"),
-                    CounterValue = kMaxSystemMemoryMbytes - (double) s.CounterValue
+                    CounterValue = kMaxSystemMemoryMbytes - (double)s.CounterValue
                 })
-                .GroupBy(g => g.Time, (key, group) => new PerformanceCounterDataViewModel
+                .GroupBy(g => g.Time, (key, group) => new PerformanceCounterStatisticsViewModel
                 {
                     Timestamp = key,
                     CounterValue = group.Max(g => g.CounterValue)
                 });
             return Json(result, JsonRequestBehavior.AllowGet);
         }
-
+     
         private readonly PerformanceDataProvider _performanceDataProvider = new PerformanceDataProvider();
         private readonly SystemDataProvider _systemDataProvider = new SystemDataProvider();
         private readonly int kMaxSystemMemoryMbytes = 8000;
