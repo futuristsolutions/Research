@@ -8,6 +8,8 @@ namespace Contact.Monitoring.ViewModel
 
         public StatusViewModel Health { get; set; }
 
+        public AddressBookViewModel LastAddressBookUpdate { get; set; }
+
         public List<ServiceOverviewViewModel> ServiceOverview { get; set; }
         public List<SystemDiskSpaceViewModel> SystemDiskSpaceViolations { get; set; }
         public List<SystemUpTimeViewModel> ServersNotContactable { get; set; }

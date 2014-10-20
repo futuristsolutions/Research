@@ -12,14 +12,15 @@ namespace Contact.Monitoring.Services
         {
             var diskThresholdViolation = GetDiskFreeSpaceBelowThreshold(MinDiskFreeSpaceThresholdPercentage);
             var servicesNotRunning = GetServicesNotRunning();
-            var lastContactedAfter = DateTime.UtcNow.AddMinutes(-ServerLastContactMinutes);
+            var lastContactedAfter = ServerLastContactedAfterTime();
             var serversNotContactable = GetServerNotContactable(lastContactedAfter);
             var pendingScheduleMessages = GetPendingScheduleMessages();
-            var last1Hour = DateTime.UtcNow.AddHours(-1);
+            var lastAddressBookUpdate = GetLastAddressBookUpdate();
+            var lookbackTime = LookBackTime();
             var memoryThresholdViolations = GetLastCounterValueViolatesThreshold("available mbytes",
-                         (p) => (double)p.CounterValue < MinAvailableMemoryThreshold, last1Hour);
+                         (p) => (double)p.CounterValue < MinAvailableMemoryThreshold, lookbackTime);
             var cpuThresholdViolations = GetLastCounterValueViolatesThreshold("% processor time",
-                        (p) => (double)p.CounterValue > MaxCpuUsageThreshold, last1Hour);
+                        (p) => (double)p.CounterValue > MaxCpuUsageThreshold, lookbackTime);
            
             var listenerSummary = GetSummary("Listener", "Listener", "_all", "requests/second", "requests served");
             var schedulerSummary = GetSummary("Push","Scheduler","_all", "requests/second", "requests served");
@@ -28,6 +29,7 @@ namespace Contact.Monitoring.Services
            
             return new OverviewViewModel
             {
+                LastAddressBookUpdate = lastAddressBookUpdate,
                 Servers = GetServerStatus(diskThresholdViolation.Any(), serversNotContactable.Any(), servicesNotRunning.Any()),
                 SystemDiskSpaceViolations = diskThresholdViolation,
                 ServersNotContactable = serversNotContactable,
@@ -41,6 +43,29 @@ namespace Contact.Monitoring.Services
                     registrationSummary,preferenceSummary,listenerSummary,schedulerSummary
                 }
             };
+        }
+
+        private AddressBookViewModel GetLastAddressBookUpdate()
+        {
+            var systemDataProvider = new SystemDataProvider();
+            return systemDataProvider.GetLastAddressBookUpdate()
+                    .Select(s => new AddressBookViewModel
+                    {
+                        Count = s.Count,
+                        LastUpdatedDateTime = s.LastUpdatedDateTime.ToString(DataTimeFormatString)
+                    })
+                    .FirstOrDefault();
+        }
+
+        private static DateTime LookBackTime()
+        {
+            var lookbackTime = DateTime.UtcNow.AddHours(-LookBackTimeHours);
+            return lookbackTime;
+        }
+        private static DateTime ServerLastContactedAfterTime()
+        {
+            var lookbackTime = DateTime.UtcNow.AddHours(-ServerLastContactMinutes);
+            return lookbackTime;
         }
 
         private List<SchedulerQueuePendingViewModel> GetPendingScheduleMessages()
@@ -74,9 +99,9 @@ namespace Contact.Monitoring.Services
 
         private ServiceOverviewViewModel GetSummary(string displayName, string service, string instance, string throughputCounter, string totalCounter)
         {
-            var last1Hour = DateTime.UtcNow.AddHours(-1);
+            var lookBackTime = LookBackTime();
             var performanceDataProvider = new PerformanceDataProvider();
-            var requestsPerSecond = performanceDataProvider.GetCounterValues(instance, throughputCounter, service, last1Hour);
+            var requestsPerSecond = performanceDataProvider.GetCounterValues(instance, throughputCounter, service, lookBackTime);
             var requestsPerSecondPerServer = requestsPerSecond.GroupBy(t => new { t.MachineName }, (key, group) =>
                          new
                          {
@@ -84,7 +109,7 @@ namespace Contact.Monitoring.Services
                              CounterValue = group.Max(g => g.CounterValue),
                              TimeStamp = group.Max(g => g.Timestamp)
                          }).ToList();
-            var totalRequests = performanceDataProvider.GetCounterValues(instance, totalCounter, service, last1Hour);
+            var totalRequests = performanceDataProvider.GetCounterValues(instance, totalCounter, service, lookBackTime);
             var totalRequestsPerServer = totalRequests.GroupBy(t => new {t.MachineName}, (key,group) =>
                          new
                          {
@@ -110,31 +135,31 @@ namespace Contact.Monitoring.Services
 
         private StatusViewModel GetHealthStatus(bool isMemoryThresholdViolated, bool isCpuThresholdViolated, bool isAnyPendingScheduleMessages)
         {
-             var healthStatusDescription = string.Join(",",(new List<string>
+             var healthStatusDescription = (new List<string>
             {
-                isMemoryThresholdViolated ? string.Format("Some of the server(s) have below threshold available memory ( < {0} )",MinAvailableMemoryThreshold): string.Empty,
-                isCpuThresholdViolated ? string.Format("Some of the server(s) above threshold of CPU usage ( > {0} )",MaxCpuUsageThreshold): string.Empty,
+                isMemoryThresholdViolated ? string.Format("Some of the server(s) have below threshold available memory ( < {0} Mbytes )",MinAvailableMemoryThreshold): string.Empty,
+                isCpuThresholdViolated ? string.Format("Some of the server(s) above threshold of CPU usage ( > {0} % )",MaxCpuUsageThreshold): string.Empty,
                 isAnyPendingScheduleMessages ? string.Format("Undelivered messages in scheduler queue"): string.Empty
-            }).Where(s => s.Length > 0));
+            }).Where(s => s.Length > 0).ToList();
             return new StatusViewModel
             {
-                Status = string.IsNullOrWhiteSpace(healthStatusDescription),
+                Status = !healthStatusDescription.Any(),
                 Description = healthStatusDescription
             };
         }
 
         private StatusViewModel GetServerStatus(bool isDiskBelowThreshold, bool isServersNotContactable, bool isServiceNotRunning)
         {
-            var serversStatusDescription = string.Join(",", (new List<string>
+            var serversStatusDescription = (new List<string>
             {
-                isDiskBelowThreshold ? string.Format("Some of the server(s) have below threshold free disk space ( < {0} percentage free )",MinDiskFreeSpaceThresholdPercentage): string.Empty,
+                isDiskBelowThreshold ? string.Format("Some of the server(s) have below threshold free disk space ( < {0} % free )",MinDiskFreeSpaceThresholdPercentage): string.Empty,
                 isServersNotContactable ? string.Format("Some of the server(s) not contactable ( in the last {0} minutes )",ServerLastContactMinutes): string.Empty,
                 isServiceNotRunning ? string.Format("Some of services not running"): string.Empty
-            }).Where(s => s.Length > 0)).Trim();
+            }).Where(s => s.Length > 0).ToList();
             
             var serverStatus = new StatusViewModel
             {
-                Status = !string.IsNullOrWhiteSpace(serversStatusDescription),
+                Status = !serversStatusDescription.Any(),
                 Description = serversStatusDescription
             };
             return serverStatus;
@@ -185,5 +210,7 @@ namespace Contact.Monitoring.Services
         private const double MaxCpuUsageThreshold = 90.00;
         private const int ServerLastContactMinutes = 60;
         private const string DataTimeFormatString = "yyyy-MM-dd HH:mm:ss";
+        private const int LookBackTimeHours = 1;
     }
+
 }

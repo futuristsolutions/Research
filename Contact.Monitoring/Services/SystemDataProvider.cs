@@ -53,5 +53,16 @@ namespace Contact.Monitoring.Services
                      .ToList();
             }
         }
+
+        public List<AddressBook> GetLastAddressBookUpdate()
+        {
+            using (var context = new MonitoringContext())
+            {
+                return context.AddressBooks.OrderByDescending(o => o.Id)
+                    .Take(1)
+                    .ToList();
+            }
+        }
+
     }
 }
