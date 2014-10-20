@@ -10,7 +10,13 @@
 </hgroup>
 
 <div class="container-fluid">
-
+    <div class="row"><p /></div>
+    <div class="row">
+        @if (Model.LastAddressBookUpdate != null)
+        {
+            <h3>AddressBook entries <span> <b> @Model.LastAddressBookUpdate.Count</b></span> <span>(@Model.LastAddressBookUpdate.LastUpdatedDateTime)</span></h3>
+        }
+    </div>
     <div class="row"><p /></div>
     <div class="row">
         <h3>Server 
@@ -23,10 +29,13 @@
                 <i class="glyphicon glyphicon-remove-sign"></i>
             }
         </h3>
-        <p>@Model.Servers.Description</p>
+        @foreach (var description in Model.Servers.Description)
+        {
+            <h4>@description</h4>
+        }
         @if (Model.SystemDiskSpaceViolations.Any())
         {
-            <p>Servers with disk free space violations</p>
+            <p><b>Servers with disk free space violations</b></p>
             @(Html.Kendo().Grid(Model.SystemDiskSpaceViolations)
                                       .Name("kSystemDiskSpaceViolations")
                                       .Columns(columns =>
@@ -34,18 +43,19 @@
                                           columns.Bound(c => c.MachineName);
                                           columns.Bound(c => c.Service);
                                           columns.Bound(c => c.Drive);
-                                          columns.Bound(c => c.Size);
-                                          columns.Bound(c => c.FreeSpace);
+                                          columns.Bound(c => c.Size).Title("Size (GB)");
+                                          columns.Bound(c => c.FreeSpace).Title("FreeSpace (GB)");
                                       })
-                                      .DataSource(dataSource => dataSource
+                                    .Pageable()
+                                    .DataSource(dataSource => dataSource
                                         .Ajax()
-                                        .PageSize(4)
+                                        .PageSize(8)
                                         .ServerOperation(false))
             )
         }
         @if (Model.ServersNotContactable.Any())
         {
-            <p>Servers not contactable</p>
+            <p><b>Servers not contactable</b></p>
             @(Html.Kendo().Grid(Model.ServersNotContactable)
                                       .Name("kServersNotContactable")
                                       .Columns(columns =>
@@ -54,16 +64,17 @@
                                           columns.Bound(c => c.Service);
                                           columns.Bound(c => c.LastUpdatedDateTime).Title("Last Contacted");
                                       })
-                                      .DataSource(dataSource => dataSource
-                                        .Ajax()
-                                        .PageSize(4)
-                                        .ServerOperation(false))
+                                        .Pageable()
+                                        .DataSource(dataSource => dataSource
+                                            .Ajax()
+                                            .PageSize(8)
+                                            .ServerOperation(false))
             )
         }
         
         @if (Model.ServicesNotRunning.Any())
         {
-            <p>Services not running</p>
+            <p><b>Services not running</b></p>
             @(Html.Kendo().Grid(Model.ServicesNotRunning)
                                            .Name("kServicesNotRunning")
                                           .Columns(columns =>
@@ -74,9 +85,10 @@
                                               columns.Bound(c => c.Status);
                                               columns.Bound(c => c.Instance);
                                           })
+                                          .Pageable()
                                           .DataSource(dataSource => dataSource
                                             .Ajax()
-                                            .PageSize(4)
+                                            .PageSize(8)
                                             .ServerOperation(false))
             )
         }
@@ -93,28 +105,31 @@
                 <span class="glyphicon glyphicon-remove-sign"></span>
             }
         </h3>
-        <p>@Model.Health.Description</p>
+        @foreach (var description in Model.Health.Description)
+        {
+            <h4>@description</h4>
+        }
         @if (Model.CpuThresholdViolations.Any())
         {
-            <p>CPU Threshold violations</p>
+            <p><b>CPU Threshold violations</b></p>
             @(Html.Kendo().Grid(Model.CpuThresholdViolations)
                                       .Name("kCpuThresholdViolations")
                                       .Columns(columns =>
                                       {
                                           columns.Bound(c => c.MachineName);
                                           columns.Bound(c => c.Service);
-                                          columns.Bound(c => c.Counter);
-                                          columns.Bound(c => c.CounterValue);
+                                          columns.Bound(c => c.CounterValue).Title("CPU Usage (%)");
                                       })
-                                      .DataSource(dataSource => dataSource
-                                        .Ajax()
-                                        .PageSize(4)
-                                        .ServerOperation(false))
+                                        .Pageable()
+                                        .DataSource(dataSource => dataSource
+                                            .Ajax()
+                                            .PageSize(8)
+                                            .ServerOperation(false))
             )
         }
         @if (Model.MemoryThresholdViolations.Any())
         {
-            <p>Memory Threshold violations</p>
+            <p><b>Memory Threshold violations</b></p>
             @(Html.Kendo().Grid(Model.MemoryThresholdViolations)
                                       .Name("kMemoryThresholdViolations")
                                       .Columns(columns =>
@@ -124,15 +139,16 @@
                                           columns.Bound(c => c.Counter);
                                           columns.Bound(c => c.CounterValue);
                                       })
-                                      .DataSource(dataSource => dataSource
+                                    .Pageable()
+                                    .DataSource(dataSource => dataSource
                                         .Ajax()
-                                        .PageSize(4)
+                                        .PageSize(8)
                                         .ServerOperation(false))
             )
         }
         @if (Model.PendingScheduleMessages.Any())
         {
-            <p>Pending scheduler messages</p>
+            <p><b>Pending scheduler messages</b></p>
             @(Html.Kendo().Grid(Model.PendingScheduleMessages)
                                           .Name("kPendingScheduleMessages")
                                       .Columns(columns =>
@@ -141,10 +157,11 @@
                                           columns.Bound(c => c.PendingFrom);
                                           columns.Bound(c => c.QueueCount);
                                       })
-                                      .DataSource(dataSource => dataSource
-                                        .Ajax()
-                                        .PageSize(4)
-                                        .ServerOperation(false))
+                                        .Pageable()
+                                        .DataSource(dataSource => dataSource
+                                            .Ajax()
+                                            .PageSize(8)
+                                            .ServerOperation(false))
             )
         }
     </div>
@@ -163,7 +180,7 @@
               })
               .DataSource(dataSource => dataSource
                   .Ajax()
-                  .PageSize(4)
+                  .PageSize(8)
                   .ServerOperation(false))
             )
 </div>

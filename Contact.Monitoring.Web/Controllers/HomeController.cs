@@ -36,6 +36,7 @@ namespace Contact.Monitoring.Web.Controllers
         public ActionResult Overview()
         {
             ViewBag.Message = "Contact Service Overview.";
+            Response.AddHeader("Refresh", "30");
             var overviewService = new OverviewService();
             var overviewModel = overviewService.GetOverview();
             return View(overviewModel);
