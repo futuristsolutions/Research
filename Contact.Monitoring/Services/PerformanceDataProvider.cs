@@ -98,6 +98,17 @@ namespace Contact.Monitoring.Services
             }
         }
 
+        public List<PerformanceCounterData> GetCounterValues(string instance, string counter, string service, decimal minCounterValue)
+        {
+            using (var context = new MonitoringContext())
+            {
+                return context.PerformanceCounterDatas
+                    .Where(c => counter == c.Counter && c.Service == service && c.InstanceName == instance && c.CounterValue > minCounterValue)
+                    .OrderByDescending(o => o.Timestamp)
+                    .ToList();
+            }
+        }
+
         public PerformanceCounterData GetLastCounterValue(string service, string counter)
         {
             using (var context = new MonitoringContext())

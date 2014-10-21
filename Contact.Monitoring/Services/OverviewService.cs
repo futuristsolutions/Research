@@ -62,6 +62,7 @@ namespace Contact.Monitoring.Services
             var lookbackTime = DateTime.UtcNow.AddHours(-LookBackTimeHours);
             return lookbackTime;
         }
+
         private static DateTime ServerLastContactedAfterTime()
         {
             var lookbackTime = DateTime.UtcNow.AddHours(-ServerLastContactMinutes);
@@ -101,8 +102,8 @@ namespace Contact.Monitoring.Services
         {
             var lookBackTime = LookBackTime();
             var performanceDataProvider = new PerformanceDataProvider();
-            var requestsPerSecond = performanceDataProvider.GetCounterValues(instance, throughputCounter, service, lookBackTime);
-            var requestsPerSecondPerServer = requestsPerSecond.GroupBy(t => new { t.MachineName }, (key, group) =>
+            var thoughputValues = performanceDataProvider.GetCounterValues(instance, throughputCounter, service, lookBackTime);
+            var thoughputValuesPerServer = thoughputValues.GroupBy(t => new { t.MachineName }, (key, group) =>
                          new
                          {
                              key.MachineName,
@@ -117,19 +118,24 @@ namespace Contact.Monitoring.Services
                             CounterValue = group.Max(g => g.CounterValue),
                             TimeStamp = group.Max(g => g.Timestamp)
                          }).ToList();
-            var maxValue = requestsPerSecondPerServer.Any() ? requestsPerSecond.Max(l => l.CounterValue) : 0.0m;
-            var avgValue = requestsPerSecondPerServer.Any() ? requestsPerSecond.Average(l => l.CounterValue) : 0.0m;
-            var lastTimeItRan = requestsPerSecondPerServer.Any()
-                ? requestsPerSecondPerServer.Max(t => t.TimeStamp) : new DateTime();
-            var lastSuccesfulRequest = totalRequestsPerServer.Any() 
-                ? totalRequestsPerServer.Sum(t => t.CounterValue) : 0.0m;
+            var maxValue = thoughputValuesPerServer.Any() ? thoughputValues.Max(l => l.CounterValue).ToString("N2") : "NO DATA";
+            var avgValue = thoughputValuesPerServer.Any() ? thoughputValues.Average(l => l.CounterValue).ToString("N2") : "NO DATA";
+
+            var sumTotalRequestsPerServer = totalRequestsPerServer.Any()
+                ? totalRequestsPerServer.Sum(t => t.CounterValue).ToString("N2") : "NO DATA";
+
+            var lastNonZeroCounterValues = performanceDataProvider.GetCounterValues(instance, throughputCounter, service, 0.0m);
+            var lastTimeItRan = lastNonZeroCounterValues.Any()
+                ? lastNonZeroCounterValues.First().Timestamp.ToString(DataTimeFormatString)
+                : "NO DATA";
+
             return new ServiceOverviewViewModel
             {
                 Category = displayName,
-                LastTimeItRan = lastTimeItRan.ToString(DataTimeFormatString),
-                ThroughputMax = maxValue.ToString("N2"),
-                ThroughputAverage = avgValue.ToString("N2"),
-                Total = lastSuccesfulRequest.ToString("N2")
+                LastTimeItRan = lastTimeItRan,
+                ThroughputMax = maxValue,
+                ThroughputAverage = avgValue,
+                Total = sumTotalRequestsPerServer
             };
         }
 
@@ -177,8 +183,7 @@ namespace Contact.Monitoring.Services
                           .ToList();
             return result;
         }
-
-
+        
         private List<SystemDiskSpaceViewModel> GetDiskFreeSpaceBelowThreshold(double freeSpaceThreshold)
         {
             var systemDataProvider = new SystemDataProvider();
