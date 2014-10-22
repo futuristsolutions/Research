@@ -43,6 +43,7 @@ namespace Contact.Monitoring.PerformanceMonitor
         {
             if (Categories.ContainsKey(category))
             {
+                Log.Info("{0} counters created", category);
                 Categories[category].Invoke();
             }
 
@@ -52,8 +53,7 @@ namespace Contact.Monitoring.PerformanceMonitor
         {
             if (Categories.ContainsKey(category))
             {
-                var initializer = Categories[category].Invoke();
-                initializer.Dispose();
+                Log.Info("{0} counters disposed", category);
             } 
         }
     }
