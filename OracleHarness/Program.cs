@@ -15,7 +15,7 @@ namespace OracleHarness
         static void Main(string[] args)
         {
             var tasks = new List<Task>();
-            for (int i = 0; i < 32; i++)
+            for (int i = 0; i < 128; i++)
             {
                 int index = i;
                 var task = Task.Factory.StartNew(() => OracleQueueTest(index));
@@ -61,7 +61,7 @@ namespace OracleHarness
                 transaction.Commit();
                 transaction.Dispose();
                 queue.Dispose();
-                //connection.Dispose();
+                connection.Dispose();
                 connection.Close();
                 ++index;
                 Console.WriteLine("[{0:D2}] Iteration {1:D4}", identifier, index);
