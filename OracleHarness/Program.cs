@@ -59,12 +59,13 @@ namespace OracleHarness
                     catch
                     {
                     }
-
+                    
                     transaction.Commit();
-                    transaction.Dispose();
                     queue.Dispose();
-                    connection.Dispose();
+                    transaction.Dispose();
+                    
                     connection.Close();
+                    connection.Dispose();
                     ++index;
                     Console.WriteLine("[{0:D2}] Iteration {1:D4}", identifier, index);
                 }
@@ -73,7 +74,7 @@ namespace OracleHarness
             {
                 Console.WriteLine(e.Message);
                 Console.WriteLine(e.StackTrace);
-                throw;
+                Environment.Exit(0);
             }
            
         }
