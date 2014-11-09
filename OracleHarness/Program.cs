@@ -29,7 +29,7 @@ namespace OracleHarness
             int index = 0;
             while (true)
             {
-                OracleConnection connection = new OracleConnection(connectionString);
+                var connection = new OracleConnection(connectionString);
                 var queue = new OracleAQQueue("SCHEDULE_QUEUE", connection)
                 {
                     MessageType = OracleAQMessageType.Raw,
@@ -61,7 +61,7 @@ namespace OracleHarness
                 transaction.Commit();
                 transaction.Dispose();
                 queue.Dispose();
-                connection.Dispose();
+                //connection.Dispose();
                 connection.Close();
                 ++index;
                 Console.WriteLine("[{0:D2}] Iteration {1:D4}", identifier, index);
