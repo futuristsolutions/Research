@@ -18,10 +18,68 @@ namespace OracleHarness
             for (int i = 0; i < 64; i++)
             {
                 int index = i;
-                var task = Task.Factory.StartNew(() => OracleQueueTest(index), TaskCreationOptions.LongRunning);
+                var task = Task.Factory.StartNew(() => OracleQueueTestUsingListen(index), TaskCreationOptions.LongRunning);
                 tasks.Add(task);
             }
             Task.WaitAll(tasks.ToArray());
+        }
+
+        private static void OracleQueueTestUsingListen(int identifier)
+        {
+            try
+            {
+                var aqueueAgent = new List<OracleAQAgent>() {new OracleAQAgent(null,"CS_SCHEDULER.SCHEDULE_QUEUE")};
+                int index = 0;
+                var connection = new OracleConnection(connectionString);
+                connection.Open();
+                while (true)
+                {
+                    var agent = OracleAQQueue.Listen(connection, aqueueAgent.ToArray(), 1);
+                    if (agent != null)
+                    {
+                        var queue = new OracleAQQueue("SCHEDULE_QUEUE", connection)
+                        {
+                            MessageType = OracleAQMessageType.Raw,
+                            EnqueueOptions =
+                            {
+                                Visibility = OracleAQVisibilityMode.OnCommit,
+                                DeliveryMode = OracleAQMessageDeliveryMode.Persistent
+                            }
+                        };
+                        var transaction = connection.BeginTransaction();
+                        var dequeueOptions = new OracleAQDequeueOptions
+                        {
+                            Visibility = OracleAQVisibilityMode.OnCommit,
+                            NavigationMode = OracleAQNavigationMode.NextMessage,
+                            DequeueMode = OracleAQDequeueMode.Remove,
+                            DeliveryMode = OracleAQMessageDeliveryMode.Persistent,
+                            Wait = 1
+                        };
+                        try
+                        {
+                            queue.Dequeue(dequeueOptions);
+                        }
+                        catch
+                        {
+                        }
+                        transaction.Commit();
+                        queue.Dispose();
+                        transaction.Dispose();
+                        queue.Dispose();
+                    }
+                    ++index;
+                    Console.WriteLine("[{0:D2}] Iteration {1:D4}", identifier, index);
+                }
+                connection.Close();
+                connection.Dispose();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.StackTrace);
+                Environment.Exit(0);
+            }
+           
         }
 
         private static void OracleQueueTest(int identifier)
@@ -36,10 +94,10 @@ namespace OracleHarness
                     {
                         MessageType = OracleAQMessageType.Raw,
                         EnqueueOptions =
-                    {
-                        Visibility = OracleAQVisibilityMode.OnCommit,
-                        DeliveryMode = OracleAQMessageDeliveryMode.Persistent
-                    }
+                        {
+                            Visibility = OracleAQVisibilityMode.OnCommit,
+                            DeliveryMode = OracleAQMessageDeliveryMode.Persistent
+                        }
                     };
                     connection.Open();
                     var transaction = connection.BeginTransaction();
@@ -59,13 +117,12 @@ namespace OracleHarness
                     catch
                     {
                     }
-                    
+
                     transaction.Commit();
-                    queue.Dispose();
                     transaction.Dispose();
-                    
-                    connection.Close();
+                    queue.Dispose();
                     connection.Dispose();
+                    connection.Close();
                     ++index;
                     Console.WriteLine("[{0:D2}] Iteration {1:D4}", identifier, index);
                 }
@@ -74,9 +131,9 @@ namespace OracleHarness
             {
                 Console.WriteLine(e.Message);
                 Console.WriteLine(e.StackTrace);
-                Environment.Exit(0);
+                throw;
             }
-           
+
         }
     }
 }
