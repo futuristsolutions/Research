@@ -31,10 +31,10 @@ namespace OracleHarness
             if (algo != -1)
             {
                 var action = (algo == 1)
-                    ? (Action<int>)(DequeueTestUsingListen)
-                    : DequeueTestNoListen;
+                    ? (Action<int>)(DequeueTest_UsingListen)
+                    : DequeueTest_NoListen;
                 var tasks = new List<Task>();
-                for (int index = 1; index <= 64; index++)
+                for (int index = 1; index <= 32; index++)
                 {
                     int identifier = index;
                     var task = Task.Factory.StartNew(() => action(identifier), TaskCreationOptions.LongRunning);
@@ -46,7 +46,7 @@ namespace OracleHarness
             }
         }
 
-        private static void DequeueTestUsingListen(int identifier)
+        private static void DequeueTest_UsingListen(int identifier)
         {
             try
             {
@@ -103,7 +103,7 @@ namespace OracleHarness
            
         }
 
-        private static void DequeueTestNoListen(int identifier)
+        private static void DequeueTest_NoListen(int identifier)
         {
             try
             {
