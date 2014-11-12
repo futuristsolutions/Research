@@ -28,7 +28,7 @@ namespace OracleHarness
                 {
                     int algo = Convert.ToInt32(parts.Last());
                     int numberOfThreads = 32;
-                    if (parts.Count() == 2 && args.Skip(1).Take(1).FirstOrDefault().Contains("threads"))
+                    if (args.Count() == 2 && args.Skip(1).Take(1).FirstOrDefault().Contains("threads"))
                     {
                         parts = args.Skip(1).Take(1).FirstOrDefault().Split(new[] { '=' });
                         numberOfThreads = Convert.ToInt32(parts.Last());
