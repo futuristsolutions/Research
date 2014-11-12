@@ -16,6 +16,7 @@ namespace OracleHarness
 "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={0})(PORT=1521))(CONNECT_DATA=(SERVICE_NAME={1})));User Id={2};Password={3};Pooling=true",
 "localhost", "xe", "cs_scheduler", "tesco");
         private const int NoMessagesErrorCode = 25228;
+        private static int TotalMessagesReceived = 0;
         static void Main(string[] args)
         {
             log4net.Config.XmlConfigurator.Configure();
@@ -26,12 +27,19 @@ namespace OracleHarness
                 if (parts.First().Contains("dq"))
                 {
                     int algo = Convert.ToInt32(parts.Last());
-                    DequeueTest(algo);
+                    int numberOfThreads = 32;
+                    if (parts.Count() == 2 && args.Skip(1).Take(1).FirstOrDefault().Contains("threads"))
+                    {
+                        parts = args.Skip(1).Take(1).FirstOrDefault().Split(new[] { '=' });
+                        numberOfThreads = Convert.ToInt32(parts.Last());
+                    }
+                    DequeueTest(algo, numberOfThreads);
                 }
                 else if (parts.First().Contains("eq"))
                 {
                     int delay = 0;
                     int messageCount = 5;
+                    int delayBetweenBatch = 5;
                     bool loop = false;
                     if (parts.Count() == 2)
                     {
@@ -47,11 +55,14 @@ namespace OracleHarness
                         loop = args.Last().Contains("loop");
                     }
 
+                    int totalMessagesQueued = 0;
                     do
                     {
                         EnqueueData(messageCount, delay);
-                        var waitTime = delay/2;
-                        Log.InfoFormat("Waiting for {0} seconds", waitTime);
+                        totalMessagesQueued += messageCount;
+                        var waitTime = delay;
+                        if (waitTime == 0) waitTime = delayBetweenBatch;
+                        Log.InfoFormat("Waiting for {0} seconds, Queued [{1}]", waitTime, totalMessagesQueued);
                         Thread.Sleep(TimeSpan.FromSeconds(waitTime));
                     } while (loop);
 
@@ -59,19 +70,17 @@ namespace OracleHarness
             }
             else
             {
-                Console.WriteLine("Usage: -dq=algo(1|2){1=Listen,2=NoListen} | -eq=n{number of message} [-delay=n{number of second of message delay}]");
+                Console.WriteLine("Usage: -dq=algo(1|2){1=Listen,2=NoListen} [-threads=n{number of threads}] | -eq=n{number of message} [-delay=n{number of second of message delay}] [-loop] ");
             }
-
-
         }
         
-        private static void DequeueTest(int algo)
+        private static void DequeueTest(int algo, int numberOfThreads)
         {
             var action = (algo == 1)
                 ? (Action<int>) DequeueTest_UsingListen
                 : DequeueTest_NoListen;
             var tasks = new List<Task>();
-            for (int index = 1; index <= 32; index++)
+            for (int index = 1; index <= numberOfThreads; index++)
             {
                 var identifier = index;
                 var task = Task.Factory.StartNew(() => action(identifier), TaskCreationOptions.LongRunning);
@@ -79,7 +88,11 @@ namespace OracleHarness
             }
 
             Log.InfoFormat("{0} - {1}", action.Method.Name, tasks.Count);
-            Task.WaitAll(tasks.ToArray());
+            while (Task.WaitAny(tasks.ToArray(), TimeSpan.FromSeconds(30)) == -1)
+            {
+                Log.InfoFormat("Total messages de-queued {0}",TotalMessagesReceived);
+            }
+            ;
         }
 
         private static void EnqueueData(int messageCount, int delay)
@@ -187,6 +200,7 @@ namespace OracleHarness
                 {
                     var data = Encoding.UTF8.GetString((byte[])message.Payload);
                     Log.InfoFormat("[{0:D2}] : {1} ",identifier, data);
+                    Interlocked.Increment(ref TotalMessagesReceived);
                 }
             }
             catch (OracleException ex)
