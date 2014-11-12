@@ -56,12 +56,13 @@ namespace OracleHarness
                     }
 
                     int totalMessagesQueued = 0;
+                    var connection = new OracleConnection(ConnectionString);
+                    connection.Open();
                     do
                     {
-                        EnqueueData(messageCount, delay);
+                        EnqueueData(connection, messageCount, delay);
                         totalMessagesQueued += messageCount;
                         var waitTime = delay;
-                        if (waitTime == 0) waitTime = delayBetweenBatch;
                         Log.InfoFormat("Waiting for {0} seconds, Queued [{1}]", waitTime, totalMessagesQueued);
                         Thread.Sleep(TimeSpan.FromSeconds(waitTime));
                     } while (loop);
@@ -88,18 +89,16 @@ namespace OracleHarness
             }
 
             Log.InfoFormat("{0} - {1}", action.Method.Name, tasks.Count);
-            while (Task.WaitAny(tasks.ToArray(), TimeSpan.FromSeconds(30)) == -1)
+            while (Task.WaitAny(tasks.ToArray(), TimeSpan.FromSeconds(1)) == -1)
             {
                 Log.InfoFormat("Total messages de-queued {0}",TotalMessagesReceived);
             }
             ;
         }
 
-        private static void EnqueueData(int messageCount, int delay)
+        private static void EnqueueData(OracleConnection connection, int messageCount, int delay)
         {
             Log.InfoFormat("Enqueue {0} message(s) with delay seconds {1}", messageCount, delay);
-            var connection = new OracleConnection(ConnectionString);
-            connection.Open();
             var group = Guid.NewGuid().ToString();
             for (int index = 1; index <= messageCount; index++)
             {
