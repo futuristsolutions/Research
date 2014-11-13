@@ -206,6 +206,7 @@ namespace OracleHarness
             {
                 if (ex.Number != NoMessagesErrorCode)
                     throw;
+                Log.InfoFormat("[{0:D2}] : NO DATA ", identifier);
             }
             transaction.Commit();
             transaction.Dispose();
