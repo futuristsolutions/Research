@@ -39,7 +39,6 @@ namespace OracleHarness
                 {
                     int delay = 0;
                     int messageCount = 5;
-                    int delayBetweenBatch = 5;
                     bool loop = false;
                     if (parts.Count() == 2)
                     {
