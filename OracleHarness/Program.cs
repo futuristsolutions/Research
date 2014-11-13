@@ -189,7 +189,7 @@ namespace OracleHarness
                 NavigationMode = OracleAQNavigationMode.NextMessage,
                 DequeueMode = OracleAQDequeueMode.Remove,
                 DeliveryMode = OracleAQMessageDeliveryMode.Persistent,
-                Wait = 1
+                Wait = -1
             };
             try
             {
