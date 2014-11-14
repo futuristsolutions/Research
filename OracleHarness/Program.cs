@@ -88,7 +88,8 @@ namespace OracleHarness
             }
 
             Log.InfoFormat("{0} - {1}", action.Method.Name, tasks.Count);
-            while (Task.WaitAny(tasks.ToArray(), TimeSpan.FromSeconds(1)) == -1)
+            var taskArray = tasks.ToArray();
+            while (Task.WaitAny(taskArray, TimeSpan.FromSeconds(1)) == -1)
             {
                 Log.InfoFormat("Total messages de-queued {0}",TotalMessagesReceived);
             }
@@ -133,12 +134,31 @@ namespace OracleHarness
                 var aqueueAgent = new [] {new OracleAQAgent(null,"CS_SCHEDULER.SCHEDULE_QUEUE")};
                 var connection = new OracleConnection(ConnectionString);
                 connection.Open();
+                var queue = new OracleAQQueue("SCHEDULE_QUEUE", connection)
+                {
+                    MessageType = OracleAQMessageType.Raw,
+                    EnqueueOptions =
+                    {
+                        Visibility = OracleAQVisibilityMode.OnCommit,
+                        DeliveryMode = OracleAQMessageDeliveryMode.Persistent
+                    }
+                };
+
+                var dequeueOptions = new OracleAQDequeueOptions
+                {
+                    Visibility = OracleAQVisibilityMode.OnCommit,
+                    NavigationMode = OracleAQNavigationMode.NextMessage,
+                    DequeueMode = OracleAQDequeueMode.Remove,
+                    DeliveryMode = OracleAQMessageDeliveryMode.Persistent,
+                    Wait = -1
+                };
+
                 while (true)
                 {
                     var agent = OracleAQQueue.Listen(connection, aqueueAgent, 1);
                     if (agent != null)
                     {
-                        Dequeue(connection, identifier);
+                        Dequeue(connection, queue, dequeueOptions, identifier);
                     }
                 }
             }
@@ -157,9 +177,26 @@ namespace OracleHarness
             {
                 var connection = new OracleConnection(ConnectionString);
                 connection.Open();
+                var queue = new OracleAQQueue("SCHEDULE_QUEUE", connection)
+                {
+                    MessageType = OracleAQMessageType.Raw,
+                    EnqueueOptions =
+                    {
+                        Visibility = OracleAQVisibilityMode.OnCommit,
+                        DeliveryMode = OracleAQMessageDeliveryMode.Persistent
+                    }
+                };
+                var dequeueOptions = new OracleAQDequeueOptions
+                {
+                    Visibility = OracleAQVisibilityMode.OnCommit,
+                    NavigationMode = OracleAQNavigationMode.NextMessage,
+                    DequeueMode = OracleAQDequeueMode.Remove,
+                    DeliveryMode = OracleAQMessageDeliveryMode.Persistent,
+                    Wait = -1
+                };
                 while (true)
                 {
-                    Dequeue(connection, identifier);
+                    Dequeue(connection, queue, dequeueOptions, identifier);
                 }
             }
             catch (Exception e)
@@ -171,26 +208,9 @@ namespace OracleHarness
         }
 
 
-        private static void Dequeue(OracleConnection connection, int identifier)
+        private static void Dequeue(OracleConnection connection, OracleAQQueue queue, OracleAQDequeueOptions dequeueOptions, int identifier)
         {
-            var queue = new OracleAQQueue("SCHEDULE_QUEUE", connection)
-            {
-                MessageType = OracleAQMessageType.Raw,
-                EnqueueOptions =
-                {
-                    Visibility = OracleAQVisibilityMode.OnCommit,
-                    DeliveryMode = OracleAQMessageDeliveryMode.Persistent
-                }
-            };
             var transaction = connection.BeginTransaction();
-            var dequeueOptions = new OracleAQDequeueOptions
-            {
-                Visibility = OracleAQVisibilityMode.OnCommit,
-                NavigationMode = OracleAQNavigationMode.NextMessage,
-                DequeueMode = OracleAQDequeueMode.Remove,
-                DeliveryMode = OracleAQMessageDeliveryMode.Persistent,
-                Wait = -1
-            };
             try
             {
                 var message = queue.Dequeue(dequeueOptions);
@@ -209,7 +229,6 @@ namespace OracleHarness
             }
             transaction.Commit();
             transaction.Dispose();
-            queue.Dispose();
         }
     }
 }
