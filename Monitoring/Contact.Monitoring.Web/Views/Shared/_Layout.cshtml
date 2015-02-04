@@ -1,0 +1,41 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+        <title>@ViewBag.Title - ContactService Dashboard</title>
+        <link href="@Url.Content("~/Content/Site.css")" rel="stylesheet" type="text/css" />
+        <link href="@Url.Content("~/Content/kendo/2014.2.903/kendo.common.min.css")" rel="stylesheet" type="text/css" />
+        <link href="@Url.Content("~/Content/kendo/2014.2.903/kendo.mobile.all.min.css")" rel="stylesheet" type="text/css" />
+        <link href="@Url.Content("~/Content/kendo/2014.2.903/kendo.dataviz.min.css")" rel="stylesheet" type="text/css" />
+        <link href="@Url.Content("~/Content/kendo/2014.2.903/kendo.default.min.css")" rel="stylesheet" type="text/css" />
+        <link href="@Url.Content("~/Content/kendo/2014.2.903/kendo.dataviz.default.min.css")" rel="stylesheet" type="text/css" />
+        <script src="@Url.Content("~/Scripts/kendo/2014.2.903/jquery.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/kendo/2014.2.903/kendo.all.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/kendo/2014.2.903/kendo.aspnetmvc.min.js")"></script>
+        <script src="@Url.Content("~/Scripts/kendo.modernizr.custom.js")"></script>
+        <link href="@Url.Content("~/Content/bootstrap.css")" rel="stylesheet" type="text/css" />
+        <link href="@Url.Content("~/Content/font-awesome-4.2.0/css/font-awesome.css")" rel="stylesheet" type="text/css" />
+
+</head>
+    <body>
+        <header>
+            <div class="content-wrapper">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="active">@Html.ActionLink("Overview", "Overview", "Home")</li>
+                </ul>
+            </div>
+        </header>
+        <div id="body">
+            <section class="content-wrapper main-content clear-fix">
+                @RenderBody()
+            </section>
+        </div>
+
+        <footer>
+            <div class="content-wrapper">
+                <div class="float-left">
+                    <p>&copy; @DateTime.Now.Year - ContactService Dashboard</p>
+                </div>
+            </div>
+        </footer>
+    </body>
+</html>
