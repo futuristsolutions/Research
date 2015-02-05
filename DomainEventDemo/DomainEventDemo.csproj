@@ -51,6 +51,7 @@
     <Compile Include="DomainEvents.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="IDomainEventHandler.cs" />
+    <Compile Include="ServiceLocator.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="NotificationEmailDomainEventHandler.cs" />
     <Compile Include="OrderPlaced.cs" />
