@@ -11,25 +11,18 @@ namespace DomainEventDemo
             DomainEventHandlerRegistry.BuildEventHandlerCache(Assembly.GetExecutingAssembly());
             DomainEventsLocator.Register<IDomainEventHandlerRegistry>(() => new DomainEventHandlerRegistry());
 
-            var domainEvents = new List<IDomainEvent>
-            {
-                new OrderPlaced(), new OrderProcessed(), new OrderDispatched(), new OrderCancelled()
-            };
 
             DomainEvents.RegisterCallbackForUnitTesting<OrderPlaced>((op) =>
             {
                 Console.WriteLine("Unit testing {0}", op.GetType());
             });
 
-            DomainEvents.Raise(new OrderPlaced());
-            DomainEvents.Raise(new OrderProcessed());
-            DomainEvents.Raise(new OrderDispatched());
-            DomainEvents.Raise(new OrderCancelled());
-
-            foreach (var domainEvent in domainEvents)
-            {
-               // Dispatch(domainEvent);
-            }
+            Order order = new Order();
+            order.PlaceOrder();
+            order.ProcessOrder();
+            order.DispatchOrder();
+            order.CancelOrder();
+            order.Confirm();
         }
 
         public static void Dispatch<T>(T domainEvent) where T : IDomainEvent
