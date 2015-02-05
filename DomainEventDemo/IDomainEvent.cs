@@ -1,6 +1,6 @@
 ﻿namespace DomainEventDemo
 {
-    public class IDomainEvent
+    public interface IDomainEvent
     {
     }
 }

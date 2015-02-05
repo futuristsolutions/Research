@@ -4,7 +4,7 @@ namespace DomainEventDemo
     {
 
     }
-    public interface IDomainEventHandler<in T> : IDomainEventHandler  where T : IDomainEvent
+    public interface IDomainEventHandler<in T> : IDomainEventHandler 
     {
         void Handle(T domainEvent);
     }

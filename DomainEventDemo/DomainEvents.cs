@@ -7,15 +7,15 @@ namespace DomainEventDemo
 {
     public class DomainEvents
     {
-        private static readonly DomainEvents Instance = new DomainEvents(ServiceLocator.Resolve<IDomainEventHandlerContainer>());
-        private readonly IDomainEventHandlerContainer _container;
+        private static readonly DomainEvents Instance = new DomainEvents(DomainEventsLocator.Resolve<IDomainEventHandlerRegistry>);
+        private readonly Func<IDomainEventHandlerRegistry> _handlerRegistry;
 
         [ThreadStatic] 
         private static List<Delegate> _actions;
 
-        private DomainEvents(IDomainEventHandlerContainer container)
+        private DomainEvents(Func<IDomainEventHandlerRegistry> handlerRegistry)
         {
-            _container = container;
+            _handlerRegistry = handlerRegistry;
         }
 
         public static void RegisterCallbackForUnitTesting<T>(Action<T> callback) where T : IDomainEvent
@@ -34,27 +34,38 @@ namespace DomainEventDemo
         public static void Raise<T>(T domainEvent) where T : IDomainEvent
         {
             Instance.InstanceRaise(domainEvent);
+            RaiseEventsForUnitTesting(domainEvent);
         }
 
         [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
         private void InstanceRaise<T>(T domainEvent) where T : IDomainEvent
         {
-            var eventHandlers = _container.GetEventHandlers(domainEvent);
-
-            if (eventHandlers.Any())
+            var registry = _handlerRegistry();
+            if (registry != null)
             {
-                eventHandlers.ForEach(eh => eh.Handle(domainEvent));
+                var eventHandlers = registry.GetEventHandlers(domainEvent);
+                if (eventHandlers.Any())
+                {
+                    eventHandlers.ForEach(eh => eh.Handle(domainEvent));
+                }
+                else
+                {
+                    Log.Error("No domain event handler for {0}", typeof (T));
+                }
             }
             else
             {
-                Log.Error("No domain event handler for {0}", typeof(T));
+                Log.Warn("Domain event registry not found");
             }
+        }
 
+        private static void RaiseEventsForUnitTesting<T>(T domainEvent) where T : IDomainEvent
+        {
             if (_actions != null)
             {
                 foreach (var action in _actions)
                     if (action is Action<T>)
-                        ((Action<T>)action)(domainEvent);
+                        ((Action<T>) action)(domainEvent);
             }
         }
     }

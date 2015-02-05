@@ -5,31 +5,26 @@ using System.Reflection;
 
 namespace DomainEventDemo
 {
-    public class DomainEventHandlerContainer : IDomainEventHandlerContainer
+    public class DomainEventHandlerRegistry : IDomainEventHandlerRegistry
     {
-        private static readonly Dictionary<Type, List<IDomainEventHandler>> EventHandlerCache;
-
-        static DomainEventHandlerContainer()
-        {
-            EventHandlerCache = BuildEventHandlerCache();
-        }
-
+        private static Dictionary<Type, List<IDomainEventHandler>> _eventHandlerCache = new Dictionary<Type, List<IDomainEventHandler>>();
+        
         public IEnumerable<IDomainEventHandler<T>> GetEventHandlers<T>(T domainEvent)
             where T : IDomainEvent
         {
-            if (!EventHandlerCache.ContainsKey(typeof(T)))
+            if (!_eventHandlerCache.ContainsKey(typeof(T)))
             {
                 return Enumerable.Empty<IDomainEventHandler<T>>();
             }
 
-            return EventHandlerCache[typeof(T)].Cast<IDomainEventHandler<T>>().ToArray();
+            return _eventHandlerCache[typeof(T)].Cast<IDomainEventHandler<T>>().ToArray();
         }
 
-        private static Dictionary<Type, List<IDomainEventHandler>> BuildEventHandlerCache()
+        public static void BuildEventHandlerCache(Assembly assembly)
         {
             var eventHandlerCache = GetAllDomainEventHandlers(typeof(IDomainEvent).Assembly);
             DisplayEventHandlerInfo(eventHandlerCache);
-            return eventHandlerCache;
+            _eventHandlerCache = eventHandlerCache;
         }
 
 
@@ -81,8 +76,8 @@ namespace DomainEventDemo
         }
     }
 
-    public interface IDomainEventHandlerContainer
+    public interface IDomainEventHandlerRegistry
     {
-        IEnumerable<IDomainEventHandler<T>> GetEventHandlers<T>(T domainEvent) where T : IDomainEvent;
+        IEnumerable<IDomainEventHandler<T>> GetEventHandlers<T>(T domainEvent) where T : IDomainEvent;        
     }
 }

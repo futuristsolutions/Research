@@ -28,19 +28,4 @@ namespace DomainEventDemo
         /// The collection of factory functions.
         protected Dictionary<Type, Func<object>> TypeFactories = new Dictionary<Type, Func<object>>();
     }
-
-    public class DomainDependencyResolver : ServiceLocator
-    {
-        private DomainDependencyResolver()
-        {
-            
-        }
-
-        public static T Resolve<T>()
-        {
-            return Instance.GetService<T>();
-        }
-
-        private static DomainDependencyResolver Instance = new DomainDependencyResolver();
-    }
 }

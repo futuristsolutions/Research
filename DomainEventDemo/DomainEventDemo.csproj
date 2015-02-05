@@ -45,8 +45,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DomainEventsLocator.cs" />
     <Compile Include="IDomainEvent.cs" />
-    <Compile Include="DomainEventHandlerContainer.cs" />
+    <Compile Include="DomainEventHandlerRegistry.cs" />
     <Compile Include="DomainEventHandlerResolver.cs" />
     <Compile Include="DomainEvents.cs" />
     <Compile Include="EnumerableExtensions.cs" />
