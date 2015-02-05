@@ -56,7 +56,7 @@
     <Compile Include="ServiceLocator.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="DomainEventHandler.cs" />
-    <Compile Include="OrderPlaced.cs" />
+    <Compile Include="DomainEvent.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
