@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reflection;
 
 namespace DomainEventDemo
@@ -23,6 +22,7 @@ namespace DomainEventDemo
             order.ProcessOrder();
             order.DispatchOrder();
             order.CancelOrder();
+
             order.Confirm();
         }
     }

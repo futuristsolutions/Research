@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainEventDemo", "DomainEventDemo.csproj", "{760C88C6-E237-4F4C-9113-4383EC83B9C2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainEvent.Demo", "DomainEvent.Demo.csproj", "{760C88C6-E237-4F4C-9113-4383EC83B9C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
