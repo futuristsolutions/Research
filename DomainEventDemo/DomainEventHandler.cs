@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DomainEventDemo
+﻿namespace DomainEventDemo
 {
     public class NotificationEmailDomainEventHandler : IDomainEventHandler<OrderPlaced>
                                                         ,IDomainEventHandler<OrderDispatched>
@@ -16,7 +14,7 @@ namespace DomainEventDemo
         }
     }
 
-    public class NotificationEmailDomainEventHandler2 : IDomainEventHandler<OrderPlaced>
+    public class NotificationSmsDomainEventHandler : IDomainEventHandler<OrderPlaced>
                                                         , IDomainEventHandler<OrderCancelled>
     {
         public void Handle(OrderPlaced domainEvent)

@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 namespace DomainEventDemo
 {
-    public static class DomainEventHandlerResolver
+    public static class DomainEventsHandlerLocator
     {
-        static DomainEventHandlerResolver()
+        static DomainEventsHandlerLocator()
         {
             DomainEventHandlerInstances = new Dictionary<Type, Func<IDomainEventHandler>>
             {
                 {typeof(NotificationEmailDomainEventHandler), ()=> new NotificationEmailDomainEventHandler()},
-                {typeof(NotificationEmailDomainEventHandler2), ()=> new NotificationEmailDomainEventHandler2()}
+                {typeof(NotificationSmsDomainEventHandler), ()=> new NotificationSmsDomainEventHandler()}
             };
         }
         public static IDomainEventHandler Resolve(Type domainEventType) 

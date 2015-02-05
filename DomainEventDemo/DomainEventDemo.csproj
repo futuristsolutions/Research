@@ -48,14 +48,14 @@
     <Compile Include="DomainEventsLocator.cs" />
     <Compile Include="IDomainEvent.cs" />
     <Compile Include="DomainEventHandlerRegistry.cs" />
-    <Compile Include="DomainEventHandlerResolver.cs" />
+    <Compile Include="DomainEventsHandlerLocator.cs" />
     <Compile Include="DomainEvents.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="IDomainEventHandler.cs" />
     <Compile Include="Order.cs" />
     <Compile Include="ServiceLocator.cs" />
     <Compile Include="Log.cs" />
-    <Compile Include="NotificationEmailDomainEventHandler.cs" />
+    <Compile Include="DomainEventHandler.cs" />
     <Compile Include="OrderPlaced.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

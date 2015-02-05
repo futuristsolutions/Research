@@ -47,7 +47,7 @@ namespace DomainEventDemo
                     DomainEventHandlerType = implementedType
                 }).ForEach(e =>
                 {
-                    var handler = DomainEventHandlerResolver.Resolve(e.DomainEventHandlerType);
+                    var handler = DomainEventsHandlerLocator.Resolve(e.DomainEventHandlerType);
                     if (handler != null)
                     {
                         if (!eventHandlerCache.ContainsKey(e.HandledDomainEventType))
