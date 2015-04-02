@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.Default", "WebApi.De
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.NoOwin", "WebApi.NoOwin\WebApi.NoOwin.csproj", "{7C72690E-5AEB-4824-A82A-939CEBB6F6FA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.Owin", "WebApi.Owin\WebApi.Owin.csproj", "{03DD0048-3DDE-4CD8-8760-3D4905407731}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{7C72690E-5AEB-4824-A82A-939CEBB6F6FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C72690E-5AEB-4824-A82A-939CEBB6F6FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C72690E-5AEB-4824-A82A-939CEBB6F6FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03DD0048-3DDE-4CD8-8760-3D4905407731}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03DD0048-3DDE-4CD8-8760-3D4905407731}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03DD0048-3DDE-4CD8-8760-3D4905407731}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03DD0048-3DDE-4CD8-8760-3D4905407731}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -44,6 +44,8 @@ namespace DomainEventDemo
             _events.Enqueue(() => DomainEvents.Raise(domainEvent));
         }
 
+        
+
         private readonly ConcurrentQueue<Action> _events;
     }
 }
